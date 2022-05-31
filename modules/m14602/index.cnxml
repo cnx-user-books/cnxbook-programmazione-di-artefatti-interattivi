@@ -1,0 +1,317 @@
+<document xmlns="http://cnx.rice.edu/cnxml">
+  <title>Programmazione Visuale</title>
+  <metadata xmlns:md="http://cnx.rice.edu/mdml">
+  <md:content-id>m14602</md:content-id>
+  <md:title>Programmazione Visuale</md:title>
+  <md:abstract>Si presenta una breve introduzione alla programmazione visuale per mezzo del linguaggio Pure Data (PD)</md:abstract>
+  <md:uuid>ff05c8ac-aa3e-4794-baee-222cd38fb0ff</md:uuid>
+</metadata>
+  <content>
+    <section id="id4944833">
+      <title>Programmazione Visuale</title>
+      <para id="visualpp">Un <link url="http://en.wikipedia.org/wiki/Visual_programming">linguaggio
+	di programmazione visuale</link> permette di specificare
+	programmi mediante manipolazione di elementi grafici. I
+	linguaggi più usati in ambito artistico e di produzione
+	multimediale (tra questi <link url="http://en.wikipedia.org/wiki/Pure_Data">Pure Data</link>,
+	<link url="http://en.wikipedia.org/wiki/Max/MSP">MAX/MSP</link>, <link url="http://vvvv.org/">vvvv</link>, e
+	<link url="http://en.wikipedia.org/wiki/Quartz_Composer">Quartz
+	Composer</link> sono basati sul paradigma di calcolo <link url="http://en.wikipedia.org/wiki/Dataflow_language">dataflow</link>,
+	nel quale i dati (piuttosto che le sequenze di operazioni)
+	sono al centro dell'attenzione. Le operazioni sono "scatole
+	nere" che elaborano l'input, non appena questo è disponibile,
+	producendo un output che può essere dato in input ad altre
+	scatole di elaborazione. Un programma dataflow assomiglia ad
+	una rete di catene di montaggio, esplicita in maniera
+	intrinseca il parallelismo, e non nasconde uno stato. Oltre
+	che prestarsi alla parallelizzazione automatica, i programmi
+	dataflow sono in un certo senso "auto-documentati" e si
+	prestano al debugging mediante sonde.
+      </para>
+      <para id="pdp"><link url="http://en.wikipedia.org/wiki/Pure_Data">Pure
+	Data</link> è un linguaggio di programmazione visuale
+	inizialmente concepito da <link url="http://crca.ucsd.edu/~msp/">Miller Puckette</link> per la
+	computer music in tempo reale, poi esteso ad opera di una
+	comunità di programmatori ed oggi diffuso anche tra artisti
+	visuali, performer e interaction designer. Pure Data è un
+	software libero, ed ha uno stretto grado di parentela con
+	<link url="http://en.wikipedia.org/wiki/Max_%28software%29">MAX/MSP</link>.
+	Essendo nato per elaborare e controllare segnale audio, Pure
+	Data supporta la comunicazione dei dati da un operatore
+	all'altro a due rate: il sample rate che per default è di
+	44100 campioni al secondo, ed il control rate ad un
+	sessantaquattresimo del sample rate. Più precisamente, gli
+	operatori che elaborano segnale audio (caratterizzati dal
+	suffisso <code>~</code>) prendono campioni di ingresso in
+	maniera sincrona ad audio rate e allo stesso rate producono
+	segnali di uscita. Tutti gli altri operatori elaborano dati
+	non appena questi sono disponibili (dataflow) ad un rate
+	massimo di circa 690 Hz (per default, un sessantaquattresimo
+	del sample rate). Tutti i calcoli sono effettuati su numeri
+	floating-point a 32 bit. La documentazione di Pure Data è
+	disponibile dalla voce <code>Help</code> del suo menu, oppure
+	è consultabile <link url="http://crca.ucsd.edu/~msp/Pd_documentation/">online</link>. Questo
+	modulo è parzialmente basato su tale documentazione e sulle
+	<link url="http://www.music.mcgill.ca/~gary/306/">lezioni
+	di Gary Scavone</link>.
+      </para>
+
+      <para id="pdobjectsp">
+	I programmi Pure Data sono chiamati <emphasis>patch</emphasis>
+	e si presentano come grafi di elaborazione di flussi di
+	dati. Ogni programma ha una finestra principale e può avere un
+	numero arbitrario di sottofinestre.  Il software Pure Data ha una <link url="http://en.wikipedia.org/wiki/Mode_%28computer_interface%29">interfaccia
+	modale</link>, in quanto ci sono due modi distinti di
+	operazione: run mode e edit mode. Si passa dall'uno all'altro
+	con <code>command-E</code> e il feedback sul modo corrente è
+	dato dalla forma del puntatore del mouse. I blocchi che si possono
+	connettere in forma di grafo di dataflow sono di tipo: object,
+	message, atom (number o symbol), GUI, e comment.
+      </para>
+      <para id="hellop"><figure id="helloi">
+	  <media id="id7192061" alt=""><image src="../../media/hello.jpg" mime-type="image/jpeg"/></media>
+	</figure>
+	In <link target-id="helloi"/> è illustrato un semplicissimo <link resource="./hello.pd">patch</link> che stampa sulla consolle la scritta
+ <code>x1: Hello World</code>. Esso contiene due oggetti message (lato
+ destro concavo) ed un oggetto object (rettangolo con comando
+ <code>print x1</code>). L'oggetto object rapresenta un comando con
+ eventuali parametri di default. Il quadrato con cerchio all'interno è
+ uno speciale messaggio senza contenuto, chiamato
+ <emphasis>bang</emphasis>, che invia un evento ai blocchi ad esso
+ collegati.
+      </para>
+
+<section id="id7112343">
+	<title>Idiosincrasie grafiche</title>
+      <para id="idiop"><figure id="idioi">
+	  <media id="id7104032" alt=""><image src="../../media/depth-first.png" mime-type="image/png"/></media>
+	</figure>
+	  Ogniqualvolta un messaggio è inviato ad un oggetto, questi
+	  può diventare mittente a sua volta verso altri oggetti. In
+	  altri termini, si configura un albero di ricezioni di
+	  messaggi. Secondo il <link url="http://crca.ucsd.edu/~msp/Pd_documentation/x2.htm#s3.2"> manuale di Pure Data </link> l'ordine di esecuzione utilizzato è
+	  <link url="http://en.wikipedia.org/wiki/Depth-first_search">depth-first</link>,
+	  cioè ogni ramo è esplorato fino alle foglie prima di
+	  procedere con gli altri rami. L'ordine di esecuzione tra
+	  nodi allo stesso livello dell'albero sarebbe invece da considerarsi
+	  indeterminato. In realtà, provando ad eseguire l'<link resource="./depth-first.pd">esempio</link> di <link target-id="idioi"/> e ridisponendo le connessioni tra i nodi dell'albero con ordini diversi ci si accorge che non si può nemmeno contare sull'ordine depth-first, in quanto esso interferisce con l'ordine di immissione delle connessioni. In Max/MSP la situazione è ancora peggiore perché muovendo messaggi e bang in posti diversi della finestra, a parità di configurazione topologica, si ottengono sequenze di attivazione diverse. 
+
+	  L'elaborazione di tipo dataflow può dare luogo a loop non
+	  computabili, quale è quello riportato in <link target-id="noncomploop"/>. Pure Data, in questo caso, riporta
+	  un messaggio di "stack overflow" sulla consolle. Per rendere
+	  il loop computabile è sufficiente inserire un elemento di
+	  disaccoppiamento quale è un <code>pipe</code> (si veda <link target-id="ritardip"/>). Per quanto sia piccolo il parametro
+	  ritardo di questo pipe (al limite anche nullo), esso
+	  terrà memoria del dato in ingresso per consumarlo al ciclo
+	  successivo di calcolo.
+	<figure id="noncomploop">
+	  <media id="id7243149" alt=""><image src="../../media/noncomploop.png" mime-type="image/png"/></media>
+	</figure>
+
+      </para>
+
+	<para id="rightleft">
+	  Nella maggior parte degli oggetti, la inlet di sinistra è
+	  <emphasis>hot</emphasis>, nel senso che messaggi che ad essa
+	  arrivano scatenano messaggi in output. 
+
+	  E' spesso desiderabile inviare messaggi a due o più inlet di
+	  un oggetto, ma il risultato dell'operazione può dipendere
+	  dall'ordine con cui si sono fatte le connessioni. Ciò mina
+	  l'efficacia semantica del programma visuale, in quanto
+	  potremmo avere due patch apparentemente identiche che però
+	  si comportano diversamente perché costruite con un ordine
+	  diverso. Ad esempio, si provi a fare la somma di un numero
+	  con sè stesso secondo la <link target-id="plus"/>. 
+	  <figure id="plus">
+	  <media id="id7363346" alt=""><image src="../../media/plus.png" mime-type="image/png"/></media>
+	</figure>
+	  La sequenza di creazione delle connessioni determina la
+          correttezza o meno del risultato. Per imporre chiarezza
+          semantica al patch è opportuno inserire un oggetto
+          <code>trigger</code> che forza l'ordine di attivazione delle
+          outlet da destra a sinistra, come indicato in <link target-id="plust"/>.
+	<figure id="plust">
+	  <media id="id7119221" alt=""><image src="../../media/plust.png" mime-type="image/png"/></media>
+	</figure>
+	</para>
+</section>
+
+      <section id="id7183016">
+	<title>Elementi di GUI</title>
+      <para id="metrop"><figure id="metroi">
+	  <media id="id3826016" alt=""><image src="../../media/metro.jpg" mime-type="image/jpeg"/></media>
+	</figure>
+	In <link target-id="metroi"/> è illustrata l'utilizzazione di un
+	  <link resource="./metro.pd">generatore periodico di
+	  bang</link>. Si noti il parametro di <code>metro</code> che
+	  stabilisce l'intervallo (di 500 millisecondi) tra due
+	  bang. Il quadrato in alto è un elemento di GUI detto toggle
+	  switch, in pratica un interruttore.
+      </para>
+
+      <para id="sliderp"><figure id="slideri">
+	  <media id="id7095808" alt=""><image src="../../media/slider.jpg" mime-type="image/jpeg"/></media>
+	</figure>
+	Un altro elemento di GUI, il <link resource="./slider.pd">vslider</link>, è illustrato in <link target-id="slideri"/>. In questo patch è anche visibile un
+	oggetto number, il quale invia un numero in uscita
+	(<emphasis>outlet</emphasis>) ogni volta che ne viene cambiato
+	il valore, per dragging con il mouse o per immissione di
+	numeri dal suo input.
+      </para>
+      </section>
+
+      <section id="id7199106">
+	<title>Array</title>
+      <para id="arrayp"><figure id="arrayi">
+	  <media id="id7180162" alt=""><image src="../../media/table.jpg" mime-type="image/jpeg"/></media>
+	</figure>
+	  In Pure Data, un array è un contenitore di numeri ed un
+	      elemento di visualizzazione al tempo stesso. Infatti,
+	      l'oggetto <code>table</code> istanzia l'array e crea un
+	      subpatch che ne visualizza la rappresentazione
+	      grafica. Questa rappresentazione è anche uno strumento
+	      di input, in quanto i valori dell'array possono essere
+	      "disegnati" con il mouse. Per leggere e scrivere i
+	      singoli elementi dell'array si usano gli oggetti
+	      <code>tabread</code> e
+	      <code>tabwrite</code>. L'utilizzazione di
+	      <code>tabread</code> per <link resource="./table.pd">scandire un array</link> è illustrata
+	      in <link target-id="arrayi"/>.
+      </para>
+
+      </section>
+
+      <section id="id7453418">
+	<title>Selezioni, routing, multiplexing</title>
+      <para id="comparisonp"><figure id="comparisoni">
+	  <media id="id7119034" alt=""><image src="../../media/comparisons.jpg" mime-type="image/jpeg"/></media>
+	</figure>
+	In <link target-id="comparisoni"/> sono illustrati <link resource="./comparisons.pd">blocchi di confronto e
+	selezione</link>. In particolare, il blocco
+	<code>select</code> attiva l'uscita di sinistra se l'ingresso
+	  (<emphasis>inlet</emphasis>) è uguale al suo parametro,
+	altrimenti attiva l'uscita di destra.
+      </para>
+
+ <para id="routingp"><figure id="routingi">
+	  <media id="id5822687" alt=""><image src="../../media/routing.jpg" mime-type="image/jpeg"/></media>
+	</figure>
+	In <link target-id="routingi"/> sono illustrati tre <link resource="./routing.pd">elementi di routing</link>. Il blocco
+	    <code>spigot</code> trasmette messaggi dall'inlet di
+	    sinistra all'outlet in dipendenza dallo stato
+	    dell'ingresso (di controllo) di destra. In sostanza si
+	    tratta di un <emphasis>gate</emphasis> con controllo di
+	    apertura e chiusura. Invece, <code>moses</code> consente
+	    di smistare alle uscite sinistra e destra i valori di
+	    ingresso che sono rispettivamente minori o maggiori (o
+	    uguali) del valore di controllo passato dalla inlet di
+	    destra. Infine, <code>route</code> smista dei messaggi
+	    ricevuti in ingresso sulla base del loro primo elemento,
+	    mettendolo a confronto con gli argomenti. Un <link url="http://en.wikipedia.org/wiki/Multiplexer">multiplexer</link> si
+	    può ottenere combinando la <code>route</code> con la
+	    <code>pack</code>.
+      </para>
+	<exercise id="muxprob">
+	  <problem id="id7369646">
+	    <para id="muxp">
+	      Realizzare un multiplexer e un demultiplexer utilizzando
+	      gli oggetti <code>pack</code>, <code>route</code> e
+	      <code>spigot</code>.
+	    </para>
+	  </problem>
+	  <solution id="id7197778">
+	    <para id="muxs"><link resource="./muxdemux.pd">Pure Data patch</link>.
+	    </para>
+	  </solution>
+	</exercise>
+      </section>
+
+      <section id="id7106460">
+	<title>Ritardi, code e gestione del tempo</title>
+
+  <para id="ritardip"><figure id="ritardii">
+	  <media id="id3022932" alt=""><image src="../../media/delays.jpg" mime-type="image/jpeg"/></media>
+	</figure>
+	In <link target-id="ritardii"/> è illustrata l'utilizzazione di
+	  <link resource="./delays.pd">ritardi e code</link>. La
+	  <code>delay</code> ritarda un bang in ingresso di un numero
+	  di millisecondi pari al suo argomento. Se si vuole ritardare
+	  un flusso di dati bisogna usare la <code>pipe</code>, la
+	  quale è realizzata come <link document="m14556" target-id="codep">coda a buffer circolare</link>. 
+      </para>
+
+  <para id="tempop"><figure id="tempoi">
+	  <media id="id7234920" alt=""><image src="../../media/timing.jpg" mime-type="image/jpeg"/></media>
+	</figure>
+	  In <link target-id="tempoi"/> si vedono alcuni oggetti che
+	  consentono di <link resource="./timing.pd">scandire, misurare, e
+	  avanzare</link> il tempo. Rispettivamente, ciò si ottiene
+	  con <code>metro</code>, <code>timer</code>, e
+	  <code>line</code>. Quest'ultimo oggetto genera una rampa
+	  lineare, da un valore iniziale a uno finale, in un certo
+	  tempo.
+      </para>
+	<exercise id="arrayex">
+	  <problem id="id5619377">
+	    <para id="arrayexp">
+	      Nel patch di <link target-id="arrayi"/>, si provi a
+	      rimuovere e ripristinare i collegamenti che arrivano
+	      alla inlet di destra dell'oggetto <code>float</code>, e
+	      si verifichi che il reset dell'indice una volta
+	      raggiunto il limite di 128 può non avere luogo. Perché?
+	      Come si può introdurre in maniera deterministica il
+	      reset dell'indice?
+	    </para>
+	  </problem>
+	  <solution id="id5813892">
+	    <para id="arrayexs">
+	      E' sufficiente introdurre un elemento di
+	      disaccoppiamento (ad esempio, una <code>pipe 0</code>)
+	      che imponga un ordine tra l'immissione del numero
+	      incrementato e l'immissione di 0 nella inlet di destra.
+	    </para>
+	  </solution>
+	</exercise>
+      </section>
+
+      <section id="id5822651">
+	<title>Message Passing</title>
+	<para id="mpp">Il funzionamento dataflow di Pure Data avviene mediante
+	  <emphasis>pipe</emphasis> che corrispondono alle connessioni
+	  tra oggetti. E' anche possibile operare in regime di <link url="http://en.wikipedia.org/wiki/Message_passing">message
+	  passing</link>, cioè ricevere (<link resource="./receive.pd">receive</link>) e spedire (<link resource="./send.pd">send</link>) dati tra diverse parti di un
+	  patch o tra patch diversi. Ciò è illustrato in <link target-id="messagei"/>. Invece, l'oggetto <code>value</code>
+	  realizza una sorta di variabile globale.
+	<figure id="messagei">
+	  <media id="id7441010" alt=""><image src="../../media/send.jpg" mime-type="image/jpeg"/></media>
+	</figure>
+	</para>
+      </section>
+      <section id="id2579399">
+	<title>Modularità</title>
+	<para id="modulep">
+	  Nella programmazione visuale la modularità si ottiene con i
+	  meccanismi di <emphasis>subpatching</emphasis> che, in Pure
+	  Data, sono di due tipi:
+	  <list id="subpatches">
+	    <item><label>Subpatch</label> Si utilizza l'oggetto
+	    <code>pd</code> per dichiarare un subpatch. In
+	    quest'ultimo, si specificano le <code>inlet</code> e
+	      <code>outlet</code>. Si veda <link target-id="subpatch"/>.</item>
+	    <item><label>Abstraction</label> Si costruisce un patch come
+	    file separato, che a questo punto diventa uno degli
+	    oggetti a disposizione di Pure Data. Si veda <link target-id="abstraction"/>.</item>
+	  </list>
+	<figure id="subpatch">
+	  <media id="id4015730" alt=""><image src="../../media/sub.jpg" mime-type="image/jpeg"/></media>
+	</figure>
+	<figure id="abstraction">
+	  <media id="id7148686" alt=""><image src="../../media/abstraction.jpg" mime-type="image/jpeg"/></media>
+	</figure>
+	</para>
+      </section>
+    </section>
+  </content>
+  
+</document>

@@ -1,0 +1,472 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:md="http://cnx.rice.edu/mdml">
+  <title>Comunicazione tra Applicazioni</title>
+  <metadata>
+  <md:content-id>m14632</md:content-id><md:title>Comunicazione tra Applicazioni</md:title>
+  <md:abstract>Si presentano i principali protocolli e strumenti per far comunicare tra loro applicazioni software e dispositivi diversi.</md:abstract>
+  <md:uuid>7ad7dfbf-2be1-44d2-bf9b-c408a329d739</md:uuid>
+</metadata>
+  <content>
+    <section id="id3954682">
+      <title>Socket</title>
+      <para id="tcpip"><title>Il protocollo TCP/IP</title>
+	
+	La comunicazione tra macchine diverse è strutturata secondo cinque strati:
+	<list id="comlayers">
+	  <item>Application layer</item>
+	  <item>Transport layer</item>
+	  <item>Internet layer</item>
+	  <item>Network access layer</item>
+	  <item>Physical layer</item>
+	</list>
+	Il protocollo IP (Internet Protocol) viene usato nel layer 3
+	per instradare i messaggi tra reti diverse. Esso è presente
+	anche nei router, cioè in quelle macchine che fungono da snodo
+	per la comunicazione tra le reti.
+
+	Il protocollo TCP (Transmission Control Protocol) viene usato
+	nel layer 2 per fornire una modalità di comunicazione che sia
+	affidabile e che garantisca in ricezione lo stesso ordine del
+	flusso di dati (<emphasis>stream</emphasis>) imposto in
+	trasmissione. TCP deve essere presente nei due terminali
+	(host) della comunicazione.
+      </para>
+
+      <para id="indirizzip"><title>Indirizzi</title>
+	 
+
+	Ogni host ha un indirizzo internet univoco in senso globale,
+	usato da IP per instradare i messaggi. Esso è di 32 bit (in
+	IPv4, e di 128 bit in IPv6, diventato standard nel 1996) e
+	normalmente fornito in notazione "dotted-quad"
+	(e.g. 157.138.204.250) o come nome di host
+	(e.g. www.iuav.it). La traduzione da nomi a numeri puo'
+	avvenire mediante il file /etc/hosts o mediante il database
+	distribuito chiamato Domain Name Service (DNS).
+
+	Ogni applicazione deve avere un numero di port (di 16 bit)
+	univoco all'interno dell'host, usato da TCP per gestire la
+	comunicazione da e verso l'applicazione. I numeri fino a
+	IPPORT_RESERVED (tip. 1024) sono riservati per un accesso ai
+	server di sistema (HTTP, FTP, etc.).
+      </para>
+
+      <para id="datip"><title>Dati</title>
+	
+	
+	Un blocco di dati inviato da una applicazione si arricchisce
+	di informazioni aggiuntive (header) mentre scende verso gli
+	strati piu' bassi dei protocolli di comunicazione.
+
+	<list id="headerlist"><item>A livello di trasporto viene aggiunto il TCP header
+	    (in modo da formare un TCP segment), il quale contiene le
+	    seguenti informazioni:
+	    <list id="tcpheadlist">
+	      <item>Destination Port</item>
+	      <item>Sequence Number (per poter riordinare i blocchi di dati)</item>
+	      <item>Checksum (per poter rilevare errori di trasmissione)</item>
+	    </list>
+	  </item>
+	  <item>
+	    A livello di internet viene aggiunto l'IP header, in modo
+	    da formare un IP datagram. Tra le informazioni contenute
+	    in questo header vi è l'indirizzo dell'host di
+	    destinazione.
+	  </item>
+	</list>
+      </para>
+
+      <para id="affip"><title>Affidabilità della trasmissione</title>
+	 
+
+	All'interno del TCP header, il sequence number tiene traccia
+	dell'ordine dei pacchetti inviati (non piu' grandi di 64KB),
+	in modo che in ricezione si possano individuare i pacchetti
+	persi e ricostruire l'ordine corretto. Mediante il checksum il
+	ricevente è in grado di rilevare errori di trasmissione. Il
+	ricevente notifica la corretta ricezione mediante messaggi di
+	risposta. Essendo questo protocollo basato sulla connessione
+	di due nodi, tale connessione (virtuale) deve essere stabilita
+	prima di iniziare la comunicazione.
+
+	Il protocollo UDP (User Datagram Protocol) consente la
+	comunicazione priva dell'overhead dovuto ai controlli di
+	integrità e consistenza dei messaggi. Essenzialmente, UDP
+	aggiunge ad IP soltanto la capacita' di indirizzare dei
+	port. Nell'UDP header c'è anche un campo checksum, ma non è
+	previsto l'acknowledgement di ricezione corretta. Il
+	protocollo UDP non ha bisogno di una connessione stabilita
+	prima della comunicazione. Il protocollo UDP, oltre ad avere
+	minore overhead rispetto a TCP, è anche essenziale al
+	supporto di certe attività. Si pensi ad esempio al programma
+	ping, il quale verifica la qualità di una connessione. Esso
+	può funzionare solo se ha la possibilita' di verificare la
+	perdita eventuale di pacchetti.
+      </para>
+
+      <para id="csp"><title>Il modello client-server e i socket</title>
+	 Un processo
+	server attende le eventuali connessioni di processi
+	client. Quando la connessione viene stabilita, il server
+	esegue dei compiti in base a quanto ricevuto dal client e poi,
+	di solito, la connessione viene interrotta. La comunicazione
+	tra client e server deve essere affidabile.
+
+	La programmazione della comunicazione mediante TCP/IP viene di
+	solito effettuata mediante l'interfaccia socket BSD,
+	introdotta da UNIX 4.2BSD. E', di fatto, una forma di
+	Inter-Process Communication che si aggiunge alle altre forme
+	di comunicazione tra processi di UNIX (pipe, shared memory,
+	signals, message queues, semaphores) con la peculiarità di
+	consentire la comunicazione tra macchine diverse fornite di
+	indirizzo IP.
+
+	<definition id="socketd">
+	  <term>Socket</term> <meaning id="id4101661">è uno dei due terminali di una
+	  connessione bidirezionale tra due processi in esecuzione su
+	  macchine collegate ad una rete.</meaning>
+	</definition>
+
+	Java fornisce una suite di classi che consentono di stabilire
+	delle connessioni mediante socket in modo indipendente dalla
+	particolare realizzazione dei socket da parte del sistema
+	operativo sottostante. In Java, le classi Socket e
+	ServerSocket vengono usate per stabilire la connessione
+	rispettivamente dal lato client e dal lato server.
+
+La comunicazione client-server mediante socket avviene come segue:
+	<table id="cst" summary="">
+	  <tgroup cols="3">
+	    <tbody>
+	      <row>
+		<entry>CLIENT</entry>
+		<entry>-</entry>
+		<entry>SERVER</entry>
+	      </row>
+	      <row>
+		<entry>conosce hostname e port number del server</entry>
+		<entry>-</entry>
+		<entry>ascolta il socket</entry>
+	      </row>
+	      <row>
+		<entry>richiede la connessione al server</entry>
+		<entry>→</entry>
+		<entry>accetta la connessione</entry>
+	      </row>
+	      <row>
+		<entry>crea un socket e lo usa per comunicare con il server</entry>
+		<entry>←</entry>
+		<entry>ottiene un nuovo socket su un port differente</entry>
+	      </row>
+	      <row>
+		<entry/>
+		<entry>-</entry>
+		<entry>continua ad ascoltare il socket originario</entry>
+	      </row>
+	    </tbody>
+	  </tgroup>
+	</table>
+      </para>
+
+      <para id="mpp"><title>Il modello message passing</title>
+	 
+
+	Il protocollo di trasmissione UDP realizza di fatto un modello
+	di comunicazione di tipo message passing con ricezione
+	bloccante e invio non bloccante. Quindi i due partner
+	comunicano con una forma di rendez vous "lasco".  E' demandato
+	al programmatore il compito di assicurare la corretta
+	ricezione dei messaggi (<emphasis>datagram</emphasis>) se essa
+	è importante per l'applicazione.
+
+	<definition id="datagramd">
+	  <term>Datagram</term> <meaning id="id3965953">è un messaggio la cui
+	  trasmissione in rete non assicura l'effettiva ricezione, il
+	  tempo di arrivo, e l'integrita' del contenuto.</meaning>
+	</definition>
+
+	La comunicazione in UDP avviene mediante indirizzamento
+	indiretto di tipo molti a uno: la primitiva send indirizza il
+	proprio messaggio ad uno specifico identificatore del port
+	(che gioca il ruolo di una mailbox) di accesso al processo
+	destinazione (hostname e port). Il processo destinazione
+	conosce l'identità del processo sorgente mediante hostname e
+	port specificati in testa al messaggio.
+
+	Mediante UDP, è anche possibile che molti client si mettano in
+	ascolto di messaggi inviati (broadcast) da un processo
+	server. Questa è una comunicazione di tipo message passing uno
+	a molti.
+
+	In Java, le classi DatagramSocket e DatagramPacket consentono
+	di confezionare dei messaggi e di spedirli e riceverli
+	attraverso socket di tipo UDP. La classe MulticastSocket
+	consente ad un client di associarsi al gruppo di client che
+	possono ricevere il broadcast e di ricevere in modo passivo i
+	messaggi inviati dal server.
+      </para>
+
+      <para id="csprocessingp"><title>Comunicazione client-server in Processing</title>
+	 Tra le
+	  core libraries di Processing, la <link url="http://processing.org/reference/libraries/net/index.html">Network</link>
+	  consente di creare client e server. 
+      </para>
+	  <example id="contrex">
+	    <title>Controller come client</title>
+	    <para id="clientp">
+	      In questo esempio la posizione del mouse sulla finestra
+	      determina valori di ampiezza e frequenza che controllano
+	      i parametri di un oscillatore server. Più correttamente,
+	      si assume che ci sia un oscillatore con due server già
+	      attivi: uno in ascolto sulla porta <code>5214</code>
+	      (frequenza) e uno in ascolto sulla porta
+	      <code>5215</code> (ampiezza). Il numero IP
+	      <code>127.0.0.1</code> indica localhost, o la medesima
+	      macchina su cui sta girando il codice Processing.
+	      <code id="id4095289" display="block">
+
+import processing.net.*; 
+int portf = 5214;
+int porta = 5215; 
+Client frequency, amplitude; 
+int val = 0; 
+
+void setup() { 
+  size(200, 200); 
+  frequency = new Client(this, "127.0.0.1", portf); 
+  amplitude = new Client(this, "127.0.0.1", porta);
+} 
+
+void draw() { 
+  background(val); 
+  frequency.write(str(mouseX));
+  frequency.write(';');
+  amplitude.write(str(height - mouseY));
+  amplitude.write(';');
+} 
+
+	      </code>
+	    </para>
+	  </example>
+ 
+      <para id="cspdp"><title>Comunicazione client-server in Pure Data</title>
+	 Pure
+	Data mette a disposizione gli oggetti <code>netsend</code> e
+	<code>netreceive</code> per realizzare la comunicazione di
+	tipo client-server.
+
+	L'oggetto <code>netreceive</code> apre un socket di ricezione
+	TCP (stream) o UDP (datagram) su un port specificato come
+	argomento. Quando si usa TCP, l'outlet di destra restituisce
+	il numero di client che hanno aperto su questo socket la
+	connessione. La comunicazione via UDP si sceglie aggiungendo
+	un secondo argomento <code>1</code> a <code>netsend</code> e
+	<code>netreceive</code>.
+      </para>
+
+      <para id="dispp"><title>Dispositivi connessi alla rete</title>E' frequente
+	oggigiorno l'utilizzazione di protocolli di rete per l'invio
+	di dati raccolti con sensori. Esempi di dispositivi che fanno
+	questo sono le macchine Kroonde e Toaster di La Kitchen,
+	azienda francese che ha purtroppo chiuso le proprie attività
+	di recente. Queste macchine si appoggiano a UDP per inviare i
+	dati raccolti dai sensori, e sono a disposizione dei 
+	patch per Pure Data, basati su <code>netreceive</code>,
+	sono a disposizione.
+      </para>
+
+      <example id="oscex">
+	<title>Oscillatore come server</title>
+	<para id="oscservex">
+	  Un oscillatore che risponde a richieste quali quelle
+	  riportate in <link target-id="contrex"/> è rappresentato in
+	  <link target-id="oscserver"/>. Si noti come in <link target-id="contrex"/> il valore numerico rappresentante la
+	  posizione del mouse viene convertito in stringa nel momento
+	  in cui esso viene inviato. Inoltre, viene inserito il
+	  separatore <code> ';'</code> per consentire
+	  l'estrazione dei numeri da parte di Pure Data.
+	  <figure id="oscserver">
+	    <media id="id4028300" alt=""><image src="../../media/netreceive.png" mime-type="image/png"/></media>
+	  </figure>
+	</para>
+      </example>
+
+      <exercise id="bidirex">
+	<problem id="id3949655">
+	  <para id="bidirexp">
+	    Si modifichino i client e server di <link target-id="contrex"/> e <link target-id="oscex"/> in maniera da
+	    realizzare una comunicazione bidirezionale. Per esempio,
+	    fare in modo che le consolle di Processing e Pure Data
+	    scrivano entrambe i valori scambiati di frequenza.
+	  </para>
+	</problem>
+	<solution id="id4215103">
+	  <para id="bidirexs">
+	    <code id="id4082574" display="block">
+
+import processing.net.*; 
+int portf = 5214;
+int porta = 5215; 
+int ports = 5204;
+Client frequency, amplitude; 
+Server myServer;
+int val = 0; 
+
+void setup() { 
+  size(200, 200); 
+  frequency = new Client(this, "127.0.0.1", portf); 
+  amplitude = new Client(this, "127.0.0.1", porta);
+  myServer = new Server(this, ports);
+} 
+
+void draw() { 
+  background(val); 
+  frequency.write(str(mouseX));
+  frequency.write(';');
+  amplitude.write(str(height - mouseY));
+  amplitude.write(';');
+  Client thisClient = myServer.available();
+  if (thisClient !=null) {
+    String whatClientSaid = thisClient.readString();
+    if (whatClientSaid != null) {
+      print(whatClientSaid);
+    } 
+  } 
+} 
+
+	    </code>
+	  <figure id="oscserversr">
+	    <media id="id3958180" alt=""><image src="../../media/sendreceive.jpg" mime-type="image/jpeg"/></media>
+	  </figure>
+
+	  </para>
+	</solution>
+      </exercise>
+    </section>
+
+    <section id="id3950065">
+      <title>MIDI</title>
+      <para id="midip">
+	Il protocollo <link url="http://en.wikipedia.org/wiki/Midi">MIDI</link> (Musical
+	Instrument Digital Interface; IPA) è un protocollo di
+	comunicazione tra dispositivi elettronici, introdotto dalle
+	industrie degli strumenti musicali all'inizio degli anni '80
+	per garantire l'interoperabilità dei propri apparati.  Il
+	fatto che esso non si occupa di trasmettere segnali ma
+	messaggi relativi ad eventi ha fatto sì che la sua diffusione
+	sia stata ampia anche in ambito non strettamente musicale.
+
+	Lo standard MIDI comprende sia il protocollo di comunicazione
+	sia la definizione dell'interfaccia fisica. Questa trasmette
+	alla velocità di 31,250 bit al secondo dei pacchetti
+	costituiti da un bit di start (0), otto bit (un byte) di dati,
+	un bit di stop (1). I messaggi scambiati sono relativi a
+	eventi discreti (<emphasis>note-on</emphasis>,
+	<emphasis>note-off</emphasis>, etc.) o processi che inviano
+	flussi di valori (<emphasis>pitch bend</emphasis>,
+	<emphasis>aftertouch</emphasis>, <emphasis>control
+	change</emphasis>, etc.). Tutti questi messaggi appartengono a
+	uno (o tutti) di 16 canali. Un byte di
+	<emphasis>status</emphasis>, contenente canale e codice
+	relativo al tipo di messaggio, precede uno o due byte di
+	dati. Per le interazioni continue che ci si trova a dover
+	trattare nell'interaction design, sono particolarmente utili i
+	<link url="http://www.harmony-central.com/MIDI/Doc/table3.html">control
+	change</link>.
+
+	Il MIDI ha avuto un notevole successo come standard
+	industriale e, per molte applicazioni, funziona egregiamente
+	ed ha un punto di forza nella sua semplicità. Tuttavia, ha gli
+	svantaggi di una comunicazione seriale e a bassa velocità,
+	nonché le limitazioni legate alla sua bassa espressività e
+	all'origine nell'ambito degli strumenti musicali a tastiera.	
+      </para>
+
+      <para id="midipdp">In Pure Data, è disponibile una gamma di oggetti per la
+	gestione dei messaggi MIDI. La pagina di documentazione di
+	riferimento è riportata in <link target-id="midipd"/>. Si vede,
+	ad esempio, che l'oggetto <code>ctlin</code> ha tre outlet che
+	forniscono, rispettivamente, il valore, il numero, e il canale
+	di un control change.
+	  <figure id="midipd">
+	    <media id="id4207622" alt=""><image src="../../media/midipd.png" mime-type="image/png"/></media>
+	  </figure>
+
+	Per Processing e per Java esistono <link url="http://processing.org/reference/libraries/">librerie</link>  che includono funzioni di <link url="http://en.wikipedia.org/wiki/Music_sequencer">sequencer</link>.
+
+	Il MIDI può essere usato anche per far dialogare tra loro
+	applicazioni che girano in uno stesso computer o su computer
+	diversi all'interno di una rete. Il sistema operativo del
+	Macintosh, ad esempio, ha una applicazione chiamata
+	<code>Audio MIDI Setup</code> che consente di impostare uno
+	Inter-Application Communication - <code>IAC Driver</code> o un
+	MIDI <code>Network</code> driver. Se abilitati, questi device
+	driver saranno poi selezionabili come input e output device
+	dalle preferences di Pure Data.
+      </para>
+    </section>
+
+    <section id="id4019417">
+      <title>OSC</title>
+      <para id="oscp">OpenSound Control - <link url="http://en.wikipedia.org/wiki/Open_Sound_Control">OSC</link>
+	è un protocollo di comunicazione che consente a diversi
+	dispositivi elettronici e applicazioni di scambiarsi dati in
+	tempo reale su un supporto di rete. E' stato sviluppato per
+	superare le limitazioni di MIDI e per sfruttare le possibilità
+	di TCP e UDP, consentendo al tempo stesso una semantica
+	raffinata dei messaggi.
+
+	Le caratteristiche principali di OSC sono:
+	<list id="oscfeatures">
+	  <item>indirizzamento simbolico "tipo-URL" (e.g., <code>/voices/synth1/osc1/modfreq</code>)</item>
+	  <item>indipendenza dal tipo di trasporto (tipicamente UDP socket)</item>
+	  <item>argomenti numerici e simbolici ai messaggi</item>
+	  <item><link url="http://en.wikipedia.org/wiki/Regular_expression">espressioni regolari</link> per la specificazione
+	  di più destinatari (e.g.,  <code>/voices/synth1/osc[1-4]/modfreq</code>)</item>
+	  <item>temporizzazione fine</item>
+	  <item>accorpamento di messaggi in <emphasis>bundle</emphasis> che richiedono azione simultanea.</item>
+	  <item>possibilità di interrogare un OSC server sulle sue capacità</item>
+	</list>
+
+	L'unità fondamentale di OSC è il messaggio, il quale consiste
+	di un pattern di indirizzo, una stringa di tipo
+	(<emphasis>type tag</emphasis>), e un certo numero di
+	argomenti. Ad esempio, un messaggio può essere indirizzato a
+	<code>/voice/3/freq</code>, specificare come type tag un
+	singolo numero floating point, e il suo argomento può essere
+	261.62558. L'indirizzamento aperto di OSC consente a ogni
+	server di definire il proprio spazio di indirizzamento in
+	relazione alla propria organizzazione di servizi.
+
+	Un'ottima <link url="http://opensoundcontrol.org/files/Open+Sound+Control-state+of+the+art.pdf">introduzione
+	a OSC</link> si può scaricare, insieme a dettagliata
+	documentazione e a link alle realizzazioni software presso il
+	<link url="http://opensoundcontrol.org/">sito
+	ufficiale di OSC</link>.
+      </para>
+
+      <para id="oscprocessingp">
+	Per Processing esiste la libreria <link url="http://www.sojamo.de/iv/index.php?n=11">oscP5</link>
+	che consente di produrre ed interpretare messaggi e bundle di
+	OSC.
+      </para>
+
+      <exercise id="oscprocessingex">
+	<problem id="id4056938">
+	  <para id="oscprocessingexp">
+	    Si installi oscP5 per Processing e si provino gli esempi
+	      della <link url="http://www.sojamo.de/content/p5/oscP5/documentation/">documentazione</link>. In
+	      particolare, si cerchi di comprendere la composizione e
+	      decomposizione dei messaggi. Nell'esempio
+	      <code>oscP5plug</code> è illustrato un meccanismo di
+	      <link url="http://en.wikipedia.org/wiki/Event-based_programming">event-based
+	      programming</link>, secondo il quale è possibile
+	      instradare messaggi con un determinato pattern di
+	      indirizzo a un metodo specifico di una classe
+	      (<emphasis>event handler</emphasis>).
+	  </para>
+	</problem>
+      </exercise>
+    </section>
+  </content>
+  
+</document>

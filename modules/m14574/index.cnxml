@@ -1,0 +1,586 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:md="http://cnx.rice.edu/mdml">
+  <title>Segnali nel tempo: soglie e filtri</title>
+  <metadata>
+  <md:content-id>m14574</md:content-id><md:title>Segnali nel tempo: soglie e filtri</md:title>
+  <md:abstract>Nell'elaborazione di segnali catturati da sensori c'è necessità di effettuare alcune operazioni ricorrenti, quali il filtraggio o la sogliatura.</md:abstract>
+  <md:uuid>b5e01d9a-fcf9-4dca-9364-6a06e19b043c</md:uuid>
+</metadata>
+  <content>
+    
+    <section id="id5734242">
+      <title>Isteresi e soglie</title>
+      <para id="isteresip">
+	L'<link url="http://en.wikipedia.org/wiki/Hysteresis">isteresi</link>
+	è quella proprietà dei sistemi che li fa reagire con un certo
+	ritardo alle forze ad essi applicate. Ad esempio, all'atto di
+	sedersi su una poltrona imbottita, la relazione tra forza e
+	compressione del cuscino può essere di <link url="http://upload.wikimedia.org/wikipedia/commons/2/2a/Hysteresiscurve.png">forma
+	isteretica</link>, ed evidenza di ciò si può avere
+	dall'impronta lasciata nel momento in cui ci si rialza.
+
+	Nel design dell'interazione, l'isteresi viene introdotta
+	deliberatamente per ritardare le azioni del sistema rispetto
+	all'accadere di eventi. Per esempio, il click del mouse in una
+	certa area può attivare un menu, la cui scomparsa viene però
+	ritardata rispetto all'uscita da quella regione, in modo da
+	consentire all'utente di esplorare le voci del menu anche con
+	percorsi del mouse imperfetti.
+
+	Nei regolatori automatici, quale è ad esempio il termostato
+	  per la regolazione di temperatura, è spesso presente un
+	  elemento isteretico per evitare commutazioni spurie, ad
+	  esempio dovute ai rimbalzi degli interruttori. Il
+	  termostato, in particolare, attiva il bruciatore quando la
+	  temperatura scende al di sotto di una soglia
+	  (<emphasis>threshold</emphasis>) <m:math> <m:ci>A</m:ci>
+	  </m:math>, ma non lo spegne fintantoché la temperatura non
+	  raggiunge una seconda soglia <m:math>
+	  <m:apply>
+	    <m:gt/>
+	    <m:ci>B</m:ci>
+	    <m:ci>A</m:ci>
+	  </m:apply>
+	</m:math>. Quindi, l'accensione e spegnimento del bruciatore
+	dipendono dalla storia del segnale di temperatura. Ciò
+	previene sequenze rapide di accensione/spegnimento per
+	oscillazioni di temperatura intorno alla soglia.
+
+	Nella sua <link url="http://upload.wikimedia.org/wikipedia/commons/a/aa/Hysteresis_sharp_curve.svg">forma
+	più stilizzata</link>, un sistema con isteresi è
+	bistabile. Cioè caratterizzato da due stati stabili. Quindi,
+	per programmare un interruttore con isteresi è sufficiente
+	utilizzare una variabile <code>boolean acceso</code> e due
+	soglie <code>basso</code> e <code>alto</code>:
+	<code id="id8177459" display="block">
+
+	  if (acceso) {
+	     if (signal &lt; basso) {
+	        // operazioni di spegnimento
+	        acceso = false;
+	     }
+	  }
+	  else //spento
+	     if (signal &gt; alto) {
+	        // operazioni di accensione
+	        acceso = true;
+	     }
+
+	</code>
+      </para>
+      <exercise id="audioThreshold">
+	<problem id="id7490200">
+	  <para id="audioThresholdp">
+	    Si scriva un programma Processing che disegni la curva
+	    della pressione acustica catturata dal microfono. A basse
+	    pressioni la curva sia disegnata in verde. Quando la
+	    pressione acustica supera una soglia superiore la curva
+	    deve diventare di colore rosso, e tornare ad essere verde
+	    quando torna al di sotto di una soglia inferiore.
+	  </para>
+	</problem>
+	<solution id="id1172751013855">
+	  <para id="audioThresholds">
+	    Una soluzione che fa uso della libreria audio <link url="http://code.compartmental.net/tools/minim">Minim</link>
+	    è la seguente:
+	    <code id="id8732611" display="block">import ddf.minim.*;
+ 
+AudioInput in;
+int WIDTH=400, HEIGHT=200;
+int x;
+int level, prevLevel;
+color colorLine=color(0,255,0);
+boolean acceso=false;
+int basso=80;
+int alto=120;
+Minim minim;
+ 
+void setup()
+{
+  size(WIDTH, HEIGHT);
+  minim = new Minim(this);
+  // get a line-in from Minim: mono, 512 sample buffer
+  // default sampling rate is 44100, default bit-depth is 16
+  in = minim.getLineIn(Minim.MONO, 512);
+  
+}
+ 
+void draw()
+{
+  if (x==0) {
+    background(0);
+    stroke(255,0,0); line(0,HEIGHT-alto,WIDTH,HEIGHT-alto);
+    stroke(0,255,0); line(0,HEIGHT-basso,WIDTH,HEIGHT-basso);
+  }
+  stroke(colorLine);
+  level = int(in.left.level()*HEIGHT*10);
+  line(x, HEIGHT - prevLevel, (x+1)%WIDTH, HEIGHT - level);
+  x = (x+1)%WIDTH;
+  prevLevel = level;
+  if (acceso) {
+	     if (level &lt; basso) {
+                colorLine = color(0, 255, 0);
+	        acceso = false;
+	     }
+    }
+  else //spento
+            {
+	     if (level &gt; alto) {
+	        colorLine = color(255, 0, 0);
+	        acceso = true;
+	     }
+  }
+}
+ 
+void stop()
+{
+  // always stop Minim
+  minim.stop();
+  super.stop();
+}
+
+	    </code>
+	  </para>
+	</solution>
+      </exercise>
+      <exercise id="noiseGate">
+	<problem id="id8751768">
+	  <para id="noiseGatep">
+	    Si modifichi il codice di <link target-id="audioThreshold"/>
+	    in modo da ottenere la curva di livello di un <link url="http://www.doctorproaudio.com/doctor/temas/dynamics-processors-noisegates_en.shtml">noise
+	    gate</link>. Quando il livello scende al di sotto della
+	    soglia verde, si applica uno smorzamento che gradualmente
+	    forza il segnale ad essere inudibile. Quando il livello
+	    supera la soglia rossa, si applica una amplificazione che
+	    riporta il segnale al livello originale.
+	  </para>
+	</problem>
+	<solution id="id5261730">
+	  <para id="noiseGates">
+	    Nella soluzione seguente il segnale viene abbattuto,
+	      quando scende al di sotto della soglia inferiore,
+	      mediante moltiplicazioni successive per un coefficiente
+	      <code>gDown</code>, il cui valore (sempre minore di uno)
+	      viene impostato in base al tempo desiderato di
+	      smorzamento ed al frame rate. Lo smorzamento si
+	      considera esaurito quando il segnale di ingresso viene
+	      ad essere moltiplicato per <m:math> <m:mn>0.01</m:mn>
+	      </m:math>. Analogamente, al superamento della soglia
+	      superiore, il moltiplicatore viene riportato a uno
+	      mediante moltiplicazioni successive per il coefficiente
+	      <code>gUp</code>, di valore sempre maggiore di uno.
+	    <code id="id6073610" display="block">import ddf.minim.*;
+ 
+AudioInput in;
+int WIDTH=400, HEIGHT=200;
+int x;
+int level, prevLevel, levelG;
+color colorLine=color(0,255,0);
+boolean acceso=false;
+int basso=30;
+int alto=50;
+float damp=1.0;
+float gain = 1.0;
+Minim minim;
+
+float decayTime = 10.0; // in seconds
+float raiseTime = 2.0;
+float gDown = pow(10,-2/frameRate/decayTime);
+float gUp = pow(10,2/frameRate/raiseTime);
+
+ 
+void setup()
+{
+  println("gDown = " + gDown + "gUp = " + gUp);
+  size(WIDTH, HEIGHT);
+  minim = new Minim(this);
+  // get a line-in from Minim: mono, 512 sample buffer
+  // default sampling rate is 44100, default bit-depth is 16
+  in = minim.getLineIn(Minim.MONO, 512);
+  
+}
+ 
+void draw()
+{
+  if (x==0) {
+    background(0);
+    stroke(255,0,0); line(0,HEIGHT-alto,WIDTH,HEIGHT-alto);
+    stroke(0,255,0); line(0,HEIGHT-basso,WIDTH,HEIGHT-basso);
+  }
+  stroke(colorLine);
+  level = int(in.left.level()*HEIGHT);  
+  gain = gain*damp;
+  //println(gain);
+  if (gain &gt; 1.0) gain = 1.0;
+  if (gain &lt; 0.01) gain = 0.01;
+  levelG = int(level*gain);
+  line(x, HEIGHT - prevLevel, (x+1)%WIDTH, HEIGHT - levelG);
+  x = (x+1)%WIDTH;
+  prevLevel = levelG;
+  if (acceso) {
+	     if (level &lt; basso) {
+                colorLine = color(0, 255, 0);
+                damp = gDown;
+	        acceso = false;
+	     }
+    }
+  else //spento
+            {
+	     if (level &gt; alto) {
+	        colorLine = color(255, 0, 0);
+                damp = gUp;
+	        acceso = true;
+	     }
+  }
+}
+ 
+void stop()
+{
+  // always stop Minim
+  minim.stop();
+  super.stop();
+}
+
+	    </code>
+	  </para>
+	</solution>
+      </exercise>
+
+      <para id="videothresholding">
+	Gli esempi di sogliatura, isteresi, e
+	<emphasis>gating</emphasis> visti nel caso dell'elaborazione
+	del segnale audio sono di utilità generale per qualsiasi
+	flusso di segnale proveniente da un sensore e, in particolare,
+	anche nell'elaborazione di segnale video.
+      </para>
+    </section>
+<section id="id7189638">
+      <title>Filtri</title> 
+      <para id="filtrip">
+	Nella maggior parte delle applicazioni che trattano flussi di
+        segnale provenienti da sensori, c'è la necessità di addolcire
+        (<emphasis>smoothing</emphasis>) il profilo dei segnali
+        stessi, in modo da evitare picchi improvvisi e rumore a rapida
+        variabilità. Ciò si può fare con i <link document="m12827">filtri</link>.
+
+	Il più semplice filtro di smoothing è il <link document="m12827" target-id="averagingp"> filtro di media </link>, il quale
+	restituisce ad ogni istante il valor medio tra due campioni
+	temporalmente contigui del segnale di ingresso. Interpretando
+	i segnali nel dominio delle frequenze, l'operazione di
+	smoothing corrisponde ad un filtraggio passa-basso, cioè ad
+	una attenuazione delle frequenze elevate. Infatti, le
+	variazioni repentine corrispondono a componenti di frequenza
+	elevata. 
+
+	Le capacità di smoothing del filtro di media sono limitate, e
+	per ottenere degli smoothing più decisi (maggiore attenuazione
+	delle alte frequenze) bisogna fare medie pesate di un numero
+	maggiore di campioni del segnale di ingresso. Un filtro molto
+	utile allo scopo è il <link document="m12827" target-id="convfir2">filtro del secondo ordine simmetrico</link>.
+
+	Qualunque sia l'ordine del filtro, la sua realizzazione come
+	media pesata di campioni del segnale di ingresso può essere
+	effettuata convenientemente appoggiandosi alla realizzazione a
+	<link document="m14532" target-id="buffercircp">buffer
+	circolare</link>. In questo caso, la lettura avverrà da un
+	certo numero di celle contigue a quella puntata da
+	<code>OUT</code>, queste letture saranno pesate per i
+	coefficienti del filtro, e il puntatore <code>IN</code>
+	coinciderà con il puntatore <code>OUT</code>.
+      </para>
+
+      <exercise id="filtthresh">
+	<problem id="id5592925">
+	  <para id="filtthreshp"> Si modifichi il codice di <link target-id="audioThreshold"/> pre-filtrando il segnale di
+	    livello con un filtro del secondo ordine simmetrico.
+	  </para>
+	</problem>
+	<solution id="id6975103">
+	  <para id="filtthreshs">
+	    Nel codice qui proposto si possono sperimentare diversi
+	      livelli di smoothing, variando i valori di
+	      <code>a0</code> e <code>a1</code>. Più questi valori
+	      sono vicini, maggiore è l'entità dello smoothing. Per
+	      non alterare con il filtraggio l'ampiezza generale del
+	      segnale è opportuno che il doppio di <code>a0</code>,
+	      sommato ad <code>a1</code>, dia come risultato <m:math>
+	      <m:cn>1</m:cn> </m:math>.
+ 
+	    <code id="id7556960" display="block">import ddf.minim.*;
+ 
+AudioInput in;
+int WIDTH=400, HEIGHT=200;
+int x;
+int level, prevLevel;
+color colorLine=color(0,255,0);
+boolean acceso=false;
+int basso=80;
+int alto=120;
+Minim minim; 
+
+float GAIN = 10;
+int BUFLEN = 5;
+float[] buffer = new float[BUFLEN];
+int bufPoint=2, bufPoint1=1, bufPoint2=0; 
+float a0 = 0.3, a1 = 0.4; //smoothing
+//float a0 = 0, a1 = 1; // no smoothing
+void setup()
+{
+  size(WIDTH, HEIGHT);
+  minim = new Minim(this);
+  // get a line-in from Minim: mono, 512 sample buffer
+  // default sampling rate is 44100, default bit-depth is 16
+  in = minim.getLineIn(Minim.MONO, 512);
+  
+}
+ 
+void draw()
+{
+  if (x==0) {
+    background(0);
+    stroke(255,0,0); line(0,HEIGHT-alto,WIDTH,HEIGHT-alto);
+    stroke(0,255,0); line(0,HEIGHT-basso,WIDTH,HEIGHT-basso);
+  }
+  stroke(colorLine);
+  buffer[bufPoint] = in.left.level();
+  level = int((a0*buffer[bufPoint] + a1*buffer[bufPoint1] + a0*buffer[bufPoint2])*GAIN*HEIGHT);
+  bufPoint = (bufPoint+1)%BUFLEN;   bufPoint1 = (bufPoint1+1)%BUFLEN;   bufPoint2 = (bufPoint2+1)%BUFLEN;
+  line(x, HEIGHT - prevLevel, (x+1)%WIDTH, HEIGHT - level);
+  x = (x+1)%WIDTH;
+  prevLevel = level;
+  if (acceso) {
+	     if (level &lt; basso) {
+                colorLine = color(0, 255, 0);
+	        acceso = false;
+	     }
+    }
+  else //spento
+            {
+	     if (level &gt; alto) {
+	        colorLine = color(255, 0, 0);
+	        acceso = true;
+	     }
+  }
+}
+ 
+void stop()
+{
+  // always stop Minim
+  minim.stop();
+  super.stop();
+}
+
+</code>	  
+</para>
+	</solution>
+      </exercise>
+
+      <para id="filtthreshconc">
+	    Come si può dedurre dalla sperimentazione proposta in
+	    <link target-id="filtthresh"/>, prendendo medie pesate di
+	    pochi campioni di segnale l'effetto di smoothing non è
+	    macroscopico. Per avere un filtraggio più radicale bisogna
+	    usare filtri di ordine elevato (elaborazione di molti
+	    campioni di segnale) ovvero ricorrere a filtri ricorsivi.
+	  </para>
+
+	  <para id="filtriricorsivi">
+	    Un filtro è un oggetto che, preso un segnale di ingresso,
+	produce un segnale di uscita. Quando la produzione di un
+	campione del segnale di uscita si ottiene elaborando campioni
+	precedenti del segnale di uscita stesso (oltre che del segnale
+	di ingresso) si dice che il filtro è <link document="m12827" target-id="recursivediffeq">ricorsivo</link>. La ricorsività
+	consente filtraggi radicali a complessità modeste. Ad esempio,
+	il filtro del primo ordine rappresentato dall'equazione alle
+	differenze <equation id="iirdiffeq">
+<m:math type="block">
+	    <m:apply>
+	      <m:eq/>
+	      <m:apply>
+		<m:ci type="fn">y</m:ci>
+		<m:ci>n</m:ci>
+	      </m:apply>
+	      <m:apply>
+		<m:plus/>
+		<m:apply>
+		  <m:times/>
+		  <m:ci>a</m:ci>
+		  <m:apply>
+		    <m:ci type="fn">y</m:ci>
+		  <m:apply>
+		    <m:minus/>
+		    <m:ci>n</m:ci>
+		    <m:mn>1</m:mn>
+		  </m:apply>
+		  </m:apply>
+		</m:apply>
+		<m:apply>
+		  <m:times/>
+		      <m:apply>
+			<m:minus/>
+			<m:mn>1</m:mn>
+			<m:ci>a</m:ci>
+		      </m:apply>
+		  <m:apply>
+		    <m:ci type="fn">x</m:ci>
+		      <m:ci>n</m:ci>
+		  </m:apply>
+		</m:apply>
+	      </m:apply>
+	    </m:apply>
+	  </m:math> </equation> è molto efficace come filtro di
+	smoothing. E' importante mantenere la stabilità del filtro,
+	cioè evitare che un segnale di ingresso limitato produca
+	un'uscita illimitata. Nel caso del filtro ricorsivo del primo
+	ordine, ciò è garantito se <m:math>
+	  <m:apply>
+	    <m:lt/>
+	    <m:apply>
+	      <m:abs/>
+	      <m:ci>a</m:ci>
+	    </m:apply>
+	    <m:mn>1</m:mn>
+	  </m:apply>
+	</m:math>. Lo smoothing del segnale è giocoforza accompagnato
+	  da una certa latenza. Un segnale a gradino presentato in
+	  ingresso provoca in uscita un segnale che raggiunge
+	  asintoticamente il livello del gradino. Nel caso del filtro
+	  ricorsivo del primo ordine, la transizione è tanto più lenta
+	  quanto più <m:math> <m:ci>a</m:ci> </m:math> è prossimo a
+	  <m:math> <m:ci>1</m:ci> </m:math>. Per la precisione, il
+	  numero di campioni necessari per raggiungere il 99 per cento
+	  del valore finale è pari a <m:math>
+	    <m:apply>
+	      <m:eq/>
+	      <m:ci>n</m:ci>
+	  <m:apply>
+	    <m:divide/>
+	    <m:mn>-2</m:mn>
+	    <m:apply>
+	      <m:log/>
+	      <m:logbase>
+		<m:mn>10</m:mn>
+	      </m:logbase>
+	      <m:ci>a</m:ci>
+	    </m:apply>
+	  </m:apply>
+	    </m:apply>
+	</m:math>. Ad esempio, con <m:math>
+	  <m:apply>
+	    <m:eq/>
+	    <m:ci>a</m:ci>
+	    <m:mn>0.9</m:mn>
+	  </m:apply>
+	</m:math> la transizione dura circa 44 campioni. Naturalmente, la relazione
+	<m:math>
+	  <m:apply>
+	    <m:eq/>
+	    <m:ci>a</m:ci>
+	    <m:apply>
+	      <m:power/>
+	      <m:ci>10</m:ci>
+	      <m:apply>
+		<m:divide/>
+		<m:ci>-2</m:ci>
+		<m:mn>n</m:mn>
+	      </m:apply>
+	    </m:apply>
+	  </m:apply>
+	</m:math> consente di ricavare il valore del coefficiente che consente una transizione in <m:math>
+	  <m:mn>n</m:mn>
+	</m:math> campioni. Tale formula è stata usata anche per impostare i tempi di apertura e chiusura del
+	<link target-id="noiseGate">noise gate</link>.
+	  </para>
+
+      <exercise id="filtrecthresh">
+	<problem id="id7207483">
+	  <para id="filtrecthreshp"> Si modifichi il codice di <link target-id="audioThreshold"/> pre-filtrando il segnale di
+	    livello con un filtro ricorsivo del primo ordine.
+	  </para>
+	</problem>
+	<solution id="id5733921">
+	  <para id="filtrecthreshs">
+
+	    Si provino diversi valori di <code>a</code> nel codice qui proposto, mantenendo il vincolo di stabilità.
+
+	    <code id="id4226659" display="block">import ddf.minim.*;
+ 
+AudioInput in;
+int WIDTH=400, HEIGHT=200;
+int x;
+int level, prevLevel;
+color colorLine=color(0,255,0);
+boolean acceso=false;
+int basso=80;
+int alto=120;
+Minim minim;
+
+float GAIN = 10;
+float currentLev;
+float prevLev = 0;
+float a = 0.95; // the closer to 1, the smoother the signal
+
+void setup()
+{
+  size(WIDTH, HEIGHT);
+  minim = new Minim(this);
+  // get a line-in from Minim: mono, 512 sample buffer
+  // default sampling rate is 44100, default bit-depth is 16
+  in = minim.getLineIn(Minim.MONO, 512);
+  
+}
+ 
+void draw()
+{
+  if (x==0) {
+    background(0);
+    stroke(255,0,0); line(0,HEIGHT-alto,WIDTH,HEIGHT-alto);
+    stroke(0,255,0); line(0,HEIGHT-basso,WIDTH,HEIGHT-basso);
+  }
+  stroke(colorLine);
+  currentLev = a*prevLev + (1 - a)*in.left.level(); 
+  prevLev = currentLev;
+  level = int(currentLev*GAIN*HEIGHT);  
+  line(x, HEIGHT - prevLevel, (x+1)%WIDTH, HEIGHT - level);
+  x = (x+1)%WIDTH;
+  prevLevel = level;
+  if (acceso) {
+	     if (level &lt; basso) {
+                colorLine = color(0, 255, 0);
+	        acceso = false;
+	     }
+    }
+  else //spento
+            {
+	     if (level &gt; alto) {
+	        colorLine = color(255, 0, 0);
+	        acceso = true;
+	     }
+  }
+}
+ 
+void stop()
+{
+  // always stop Minim
+  minim.stop();
+  super.stop();
+}
+
+	  </code>
+	  </para>
+	</solution>
+      </exercise>
+
+      <para id="filtroris">Particolare importanza rivestono i <link document="m12827" target-id="iir2">filtri ricorsivi del secondo ordine</link>, i
+	quali fungono da modello per la realizzazioni di
+	risonanze. Una risonanza elementare si manifesta come
+	oscillazione smorzata. Se i coefficienti del filtro del
+	secondo ordine sono opportunamente scelti in modo da produrre
+	una risposta ai limiti della stabilità, quello che si ottiene
+	è una realizzazione dell'oscillatore, alternativa a quelle
+	proposte in <link document="m14532">oscillazioni, ritardi, e fluttuazioni del tempo</link>.
+      </para>
+
+    </section>
+   </content>
+  
+</document>

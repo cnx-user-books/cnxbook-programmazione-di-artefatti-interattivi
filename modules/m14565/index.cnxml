@@ -1,0 +1,565 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:md="http://cnx.rice.edu/mdml">
+  <title>Thread e I/O non bloccante</title>
+  <metadata>
+  <md:content-id>m14565</md:content-id><md:title>Thread e I/O non bloccante</md:title>
+  <md:abstract>A brief introduction to Java Threads as accessible from Processing.</md:abstract>
+  <md:uuid>c2496766-7949-4cda-a0c6-b16d2364c2b4</md:uuid>
+</metadata>
+  <content>
+    <section id="threads">
+      <title>Thread: definizione</title>
+      <para id="threadp">
+	Un thread (di controllo) è una lista di istruzioni eseguite
+	sequenzialmente da un programma. I thread di un programma
+	condividono uno stesso spazio di indirizzamento.  Pur avendo
+	stack e variabili locali separate, condividono le variabili
+	globali.  I thread sono "leggeri", nel senso che la creazione,
+	distruzione e sincronizzazione sono relativamente economiche
+	grazie alla condivisione dello spazio di indirizzamento.
+
+	Le ragioni per organizzare un programma in un certo numero di
+	thread possono essere molteplici:
+	<list id="listthreadr">
+	  <item>Certi programmi si scrivono più semplicemente, in
+	  special modo le collezioni di compiti debolmente connessi
+	  (cioè largamente indipendenti).</item> 
+
+	  <item>I programmi interattivi risultano più efficienti
+	  laddove il servizio dell'input o il display dell'output sono
+	  organizzati in thread distinti.</item>
+
+	  <item>I programmi sono potenzialmente parallelizzabili su
+	  architetture multi-processore o multi-core.</item>
+
+	  <item>Il problema in esame richiede parti di programma in
+	  comunicazione asincrona tra loro.</item>
+
+	  <item>E' utile imporre una struttura modulare al
+	  codice.</item>
+	</list>
+	</para>
+
+      <para id="nonblockio"><title>I/O non bloccante</title>
+	 
+
+	Una delle motivazioni forti per la programmazione concorrente
+	mediante thread è l'ottenimento di <link url="http://en.wikipedia.org/wiki/Non-blocking_I/O">servizi
+	non bloccanti</link> per Input/Output.  Quando l'applicazione
+	ha necessità di effettuare un I/O, è opportuno che non si
+	blocchi, in modo da consentire che altre operazioni non
+	dipendenti da quell'I/O possano essere effettuate.
+
+	Una tecnica di gestione dell'I/O non bloccante, utilizzata ad
+	esempio nei <link url="http://itp.nyu.edu/~dbo3/cgi-bin/wiki.cgi?Microcontroller">microcontrollori</link>
+	usati nelle board per il physical computing, è il
+	<emphasis>polling</emphasis>, cioè la verifica ciclica
+	dell'accadimento di eventi su un insieme di dispositivi di
+	input. La ciclicità del polling è gestita da un timer.
+
+	L'I/O non bloccante si può realizzare mediante i thread. La
+	lettura di un certo dispositivo si può assegnare ad un certo
+	thread il quale si blocca in attesa dei dati. Gli altri
+	thread, che non dipendono dalla lettura del dato, possono però
+	procedere in maniera concorrente.
+      </para>
+
+      <para id="actidiag"><title>Diagrammi di attivazione</title>
+	
+	Il codice Processing seguente invoca il metodo <code>stampa()</code> sull'oggetto <code>cl</code>
+	della classe <code>Classe1</code>.
+	<code id="id8540857" display="block">
+
+class Classe1 {
+ void stampa() {
+   for (int i=0; i&lt; 100; i++) println("yep");
+ } 
+}
+
+void setup() {
+ Classe1 cl = new Classe1();
+ cl.stampa(); 
+}
+
+	</code>
+	Il flusso di elaborazione si può rappresentare graficamente
+	con il diagramma di attivazione di <link target-id="atti1"/>, il
+	quale presenta evidentemente un singolo thread.
+
+	<figure id="atti1">
+	  <media id="id12841571" alt=""><image src="../../media/atti1.png" mime-type="image/png"/></media>
+	  <caption>Diagramma di attivazione a thread singolo</caption>
+	</figure>
+
+	Se invece la classe viene realizzata come
+	<emphasis>estensione</emphasis> della classe
+	<code>Thread</code>, allora è possibile procedere
+	all'attivazione di un thread secondario mediante invocazione
+	del metodo <code>start()</code>. Il codice va riscritto come
+
+	<code id="id12648607" display="block">
+
+class Classe2 extends Thread{
+ void run() {
+   for (int i=0; i&lt; 100; i++) println("yep");
+ } 
+}
+
+void setup() {
+ Classe2 cl = new Classe2();
+ cl.start(); 
+}
+
+	</code>
+
+ 
+	  Si noti che il metodo <code>stampa()</code> ora si chiama
+	  <code>run()</code>. Il metodo <code>start()</code> esiste
+	  nelle superclassi di <code>Classe2</code> (nella classe
+	  <code>Thread</code>, e si occupa dell'invocazione del metodo
+	  <code>run()</code>. Questa volta il flusso di elaborazione,
+	  riportato in <link target-id="atti2"/> presenta due thread.
+
+	<figure id="atti2">
+	  <media id="id4317789" alt=""><image src="../../media/atti2.png" mime-type="image/png"/></media>
+	  <caption>Diagramma di attivazione a doppio thread</caption>
+	</figure>
+
+	<note id="id8035783">
+	  Esiste un <link url="http://java.sun.com/j2se/1.4.2/docs/api/java/lang/Thread.html">secondo
+	  modo di dichiarare e attivare un thread</link>, mediante
+	  implementazione della interfaccia <code>Runnable</code> di
+	  Java. E' questa modalità che bisogna usare se si vuole
+	  attivare un nuovo thread su un oggetto di una classe che è
+	  già dichiarata come estensione di un'altra classe.
+	</note>
+     </para>
+
+    </section>
+
+      <section id="id4675219">
+	<title>Thread: utilizzazione</title>
+      <example id="ellissit">
+	<title>Thread temporizzati</title>
+	<para id="timerthreadp">
+	  La classe <code>Thread</code> possiede un metodo
+	  <code>sleep()</code> che la mette in stato
+	  <emphasis>blocked</emphasis> per un certo numero di
+	  millisecondi. Ciò consente di programmare in maniera
+	  compatta e agevole flussi di eventi tra loro
+	  indipendenti. Ad esempio, il codice che segue produce il
+	  disegno di ellissi di due colori diversi, e ogni colore
+	  corrisponde ad un diverso intervallo di tempo (i.e., 1000 e
+	  1300 millisecondi) tra due eventi successivi di disegno.
+	<code id="id12649954" display="block">
+
+class TimerThread extends Thread{
+  int timediff; // quanto temporale
+  color col;  
+  
+  TimerThread(color c, int td) {
+   timediff = td;
+   col = c;
+  }
+  
+ void run() {
+   while(true) {
+     fill(col);
+     try {
+       ellipse(int(random(100)), int(random(100)), 
+         int(random(20)), int(random(20)));  
+       sleep(timediff);
+     } catch (Exception e) {println("Exception in sleep");}
+   }
+ } 
+}
+
+void setup() {
+ TimerThread tt1 = new TimerThread(color(120,120,0),1000);
+ TimerThread tt2 = new TimerThread(color(0,120,120),1300);
+ tt1.start(); 
+ tt2.start();
+}
+
+void draw() {
+}
+
+
+	</code>
+	Si nota che il metodo <code>sleep()</code> di Java esige di
+	essere invocato all'interno di un costrutto <code>try
+	catch()</code>, cioè di una sezione di codice che consenta la
+	cattura delle eccezioni. La <link url="http://en.wikipedia.org/wiki/Exception_handling">gestione
+	delle eccezioni</link> consente di affrontare delle condizioni
+	che alterano il normale flusso di esecuzione di un
+	programma. Nell'esempio, la <code>sleep()</code> può fallire e
+	sollevare (<code>throw</code>) una eccezione che, in questo
+	caso, è gestita mediante la mera scrittura di una messaggio
+	sulla console.
+	</para>
+      </example>
+
+      <exercise id="ellissite">
+	<problem id="id12725566">
+	  <para id="ellissitep">
+	    Si aggiunga al codice di <link target-id="ellissit"/> una
+	    classe che si occupa di ridipingere a intervalli regolari
+	    lo sfondo, in maniera da evitare la sovrapposizione delle
+	    ellissi.
+	  </para>
+	</problem>
+      </exercise>
+
+</section> 
+
+    <section id="id12660799">
+      <title>I/O non bloccante basato su thread</title>
+      <para id="nonblockp">
+	Quando l'oggetto interattivo ha bisogno di leggere o scrivere
+	da/su file, dispositivi, o <link url="http://en.wikipedia.org/wiki/Network_socket">network
+	socket</link>, è opportuno che essa non si blocchi
+	completamente in attesa dei dati. Con i thread, ciò viene
+	risolto elegantemente attivando un thread separato che
+	gestisce I/O asincrono, e si blocca laddove è necessario.
+      </para>
+      <example id="id9191246">
+	<title>Lettura di comandi da tastiera</title>
+	<para id="comtp">Si supponga di dover disegnare in maniera automatica e
+	ripetuta delle ellissi nella finestra grafica, e di voler
+	controllare gli attributi di tali ellissi mediante parole
+	chiave immesse da tastiera. Conviene separare il compito di
+	lettura e interpretazione (parsing) del flusso di caratteri
+	che viene dalla tastiera dal compito di produzione dell'output
+	grafico. Ciò si può realizzare come segue, nel caso semplice
+	in cui le parole accettate siano "rosso", "verde", e "blu"
+	corrispondenti a diverse colorature delle ellissi prodotte.
+	  <code id="id12048707" display="block">
+
+StringBuffer stdin;
+boolean linea;
+color colore;
+
+void keyReleased() {
+  char c = key;
+  if (c!='\n') {
+    stdin.append(c);
+  }
+  else linea=true;
+}
+
+class ColorInput extends Thread {
+  String results;
+  char c;
+ 
+  void run()  {
+     while(true) {
+       if (linea) {
+            println(stdin);
+            results=stdin.toString();
+            stdin.setLength(0);	    
+            linea = false;
+            if (results.equals("rosso")) {
+                colore = color(255, 0, 0);
+            }
+             if (results.equals("verde")) {
+                colore = color(0, 255, 0);
+            }
+            if (results.equals("blu")) {
+                colore = color(0, 0, 255);
+            }          
+          }
+         try {
+         sleep(5); // to relief the cpu from active waiting
+         } catch (Exception e) {println("Exception in sleep");} 
+        }
+    }
+  }
+
+class TimerThread extends Thread{
+  int timediff; // quanto temporale
+  
+  TimerThread(int td) {
+   timediff = td;
+  }
+  
+ void run() {
+   while(true) {
+     try {   
+       fill(colore);
+       ellipse(int(random(100)), int(random(100)), 
+         int(random(20)), int(random(20)));  
+       sleep(timediff);
+     } catch (Exception e) {println("Exception in sleep");}
+   }
+ } 
+}
+
+void setup() {
+ stdin = new StringBuffer();
+ TimerThread tt1 = new TimerThread(100);
+ ColorInput ci = new ColorInput();
+ ci.start();
+ tt1.start(); 
+}
+
+void draw() {
+}
+
+
+	  </code>
+	  Sono presenti, in questo caso, due diverse estensioni della
+	  classe <code>Thread</code>. La prima estensione fa una
+	  attesa attiva di linee di testo, impostando il colore
+	  ogniqualvolta viene rilevata una linea di testo contenente
+	  una delle tre parole chiave riconosciute. L'invocazione di
+	  <code>sleep(5)</code> rende questa attesa attiva meno
+	  onerosa per la CPU. L'altro thread, invece, si occupa di
+	  disegnare dieci ellissi al secondo.
+
+	  In Processing è difficile realizzare un input bloccante da
+	  tastiera, in quanto non è accessibile direttamente lo stream
+	  <code>System.in</code>, sul quale in Java si può normalmente
+	  applicare lettura bufferizzata bloccante.  <note id="id7827758">Per una
+	  introduzione all'I/O in Java si veda il <link url="http://tutorials.jenkov.com/java-io/index.html">Java
+	  Java IO Tutorial</link>.</note> Viceversa, Processing invita
+	  ad una programmazione <link url="http://en.wikipedia.org/wiki/Event-based_programming">event-based</link>
+	  fornendo gli <emphasis>event handler</emphasis>
+	  <code>keyReleased()</code>, <code>keyPressed()</code>, e
+	  <code>keyTyped()</code>.  E' possibile però fare un input
+	  bloccante di una linea da file di testo con un codice del
+	  tipo
+	  <code id="id8802287" display="block">
+try {
+   BufferedReader stdiin = createReader("nomefile");
+   println(stdiin.readLine());
+ }catch(Exception e){}
+	  </code>
+	  dove <code>createReader()</code> è una funzione di Processing che crea un <code>BufferedReader</code> object da un file o da una URL. Essa consente una leggera semplificazione rispetto al codice Java
+	  <code id="id4372721" display="block">
+try {
+   FileReader is = new FileReader("nomefile");
+   BufferedReader stdiin = new BufferedReader( is );
+   println(stdiin.readLine());
+ }catch(Exception e){}
+	  </code>
+
+	  Per semplificare la lettura da file di testo, locali o
+	  remoti, Processing mette a disposizione la funzione
+	  <code>loadStrings()</code>, che carica tutte le linee di
+	  file di testo in un array di tipo
+	  <code>String[]</code>. Questo metodo può essere utile se il
+	  file non è troppo grande o dinamicamente variabile.
+	</para>
+      </example>
+
+      <exercise id="readnetex">
+	<problem id="id3697142">
+	  <para id="readnetp">
+	    Il codice che segue effettua la lettura periodica di una
+	    linea di testo da un sito generatore di testo. Lo si
+	    estenda aggiungendo un thread che visualizza queste frasi
+	    sulla finestra grafica con animazione tipografica.
+
+	    <code id="id8081555" display="block">
+
+class sentenceReader extends Thread{
+  int timediff; // quanto temporale
+  
+  sentenceReader(int td) {
+   timediff = td;
+  }
+  
+ void run() {
+    while(true) {
+      try {
+       BufferedReader stdiin = createReader("http://www.essl.at/cgi-bin/swrap/cgis/lexikon-orakel.pl");
+       for (int i=0; i&lt;13; i++) stdiin.readLine();
+       println(stdiin.readLine());
+       sleep(timediff);
+      }catch(Exception e){}
+    }
+  }
+}
+
+void setup() {
+ sentenceReader st = new sentenceReader(2000);
+ st.start();
+}
+
+void draw() {
+}
+
+
+	    </code>
+	  </para>
+	</problem>
+      </exercise>
+    </section>
+
+    <section id="id9014495">
+      <title>Sincronizzazione</title>
+      <para id="sincrop">
+	Si supponga di dover estendere la <link target-id="comtp">lettura
+	  di comandi da tastiera</link> con due thread che prendono
+	  comandi da <code>stdin</code>. I comandi possono essere
+	  consumati dall'uno o dall'altro dei thread, ma uno stesso
+	  comando non può essere consumato da entrambi. In questo caso
+	  si possono presentare problemi di <link url="http://en.wikipedia.org/wiki/Race_condition">race
+	  condition</link>, cioè configurazioni di codice concorrente
+	  che danno luogo a risultati dipendenti dalla sequenza di
+	  <emphasis>scheduling</emphasis> attribuita ai vari
+	  thread. In particolare, la <emphasis>sezione
+	  critica</emphasis>
+	<code id="id12497566" display="block">
+	    results=stdin.toString();            
+            stdin.setLength(0);
+            linea = false;
+	</code>
+	può dare luogo a comportamenti inconsistenti se interrotta
+	dallo <emphasis>scheduler</emphasis> per passare il controllo
+	dall'uno all'altro thread. Questi problemi si possono
+	risolvere imponendo la non interrompibilità delle sezioni
+	critiche di codice, per mezzo della parola chiave
+	<code>synchronized</code>.
+	Nella fattispecie, si può introdurre una classe con metodi sincronizzati:
+	<code id="id12618198" display="block">
+
+class IO extends Thread {
+ String results;
+
+ synchronized  String acquire() {
+   results=stdin.toString();
+   linea = false;
+   stdin.setLength(0);
+   return(results);
+ }
+}
+
+	</code>
+
+I metodi invocati su un oggetto di questa classe non sono
+interrompibili da metodi invocati sullo stesso oggetto.  In ambito di
+transazioni bancarie, per esempio, un metodo <code>prelievo()</code>
+dovrà essere sincronizzato per evitare inconsistenze in presenza di
+prelievi multipli, come possono essere effettuati da co-titolari dello
+stesso conto. La sincronizzazione di thread è un argomento complesso,
+per l'approfondimento del quale esistono <link url="http://www.javaworld.com/javaworld/jw-12-2000/jw-1215-threadbooks.html">libri
+specializzati</link>.
+      </para>
+    </section>
+
+    <exercise id="synchread">
+      <problem id="id8581536">
+	<para id="synchreadp">
+	 Si estenda la <link target-id="comtp">lettura
+	  di comandi da tastiera</link> con due thread che prendono
+	  comandi da <code>stdin</code>.
+	</para>
+      </problem>
+      <solution id="id12639956">
+	<para id="synchreads">
+	  Nel codice seguente si noti l'uso della
+	  <code>getName()</code> per stampare il nome del thread
+	  interessato.
+
+	  <code id="id4448518" display="block">
+
+StringBuffer stdin;
+boolean linea;
+color colore;
+IO io = new IO();
+
+void keyReleased() {
+  char c = key;
+  if (c!='\n') {
+    stdin.append(c);
+  }
+  else linea=true;
+}
+
+class IO extends Thread {
+ String results;
+
+ synchronized  String acquire() {
+   results=stdin.toString();
+   linea = false;
+   stdin.setLength(0);
+   return(results);
+ }
+}
+
+class ColorInput extends Thread {
+  String results;
+  char c;
+ 
+  void ColorInput (IO inout) {
+    io = inout;
+  }
+  void run()  {
+     while(true) {
+       if (linea) {
+            results=io.acquire();   
+            println(this.getName() + results);
+            if (results.equals("rosso")) {
+                colore = color(255, 0, 0);
+            }
+             if (results.equals("verde")) {
+                colore = color(0, 255, 0);
+            }
+            if (results.equals("blu")) {
+                colore = color(0, 0, 255);
+            }          
+          }
+         try {
+         sleep(2); // to relief the cpu from active waiting
+         } catch (Exception e) {println("Exception in sleep");} 
+        }
+    }
+  }
+
+class TimerThread extends Thread{
+  int timediff; // quanto temporale
+  
+  TimerThread(int td) {
+   timediff = td;
+  }
+  
+ void run() {
+   while(true) {
+     try {   
+       fill(colore);
+       ellipse(int(random(100)), int(random(100)), 
+         int(random(20)), int(random(20)));  
+       sleep(timediff);
+     } catch (Exception e) {println("Exception in sleep");}
+   }
+ } 
+}
+
+void setup() {
+ stdin = new StringBuffer();
+ TimerThread tt1 = new TimerThread(100);
+ ColorInput ci = new ColorInput();
+ ColorInput ci2 = new ColorInput();
+ ci.start(); ci2.start();
+ tt1.start(); 
+}
+
+void draw() {
+}
+
+
+	  </code>
+	</para>
+      </solution>
+    </exercise>
+    <section id="reference">
+      <title>Reference</title>
+      <para id="referencep">
+	Il capitolo 9 del <link url="http://www.oreilly.com/catalog/9780596514556/">libro</link>
+      <cite><cite-title>Visualizing Data -- Ben Fry; O'Really 2007</cite-title></cite> fornisce
+      esempi di acquisizione asincrona di dati da file e da siti
+      remoti, con l'utilizzazione di thread e di sincronizzazione.
+      </para>
+    </section>
+</content>
+</document>

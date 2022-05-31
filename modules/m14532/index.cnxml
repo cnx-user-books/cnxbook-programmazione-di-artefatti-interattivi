@@ -1,0 +1,440 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:md="http://cnx.rice.edu/mdml">
+  <title>Oscillazioni, ritardi, e fluttuazioni del tempo</title>
+  <metadata>
+  <md:content-id>m14532</md:content-id><md:title>Oscillazioni, ritardi, e fluttuazioni del tempo</md:title>
+  <md:abstract>La produzione di fenomeni oscillatori è un aspetto frequente di molte realizzazioni interattive. Vengono descritte tecniche di riproduzione di oscillazioni di varia forma e frequenza. Inoltre, si presenta il buffer circolare come struttura di supporto alla manipolazione continua del tempo.</md:abstract>
+  <md:uuid>c5ad2471-6233-4402-8c4a-3280445c0285</md:uuid>
+</metadata>
+  <content>
+    <para id="giustifp">
+      Tra i <link document="m14501">pattern emergenti</link> nel
+      design dell'interazione, si nota la necessità di produrre
+      fenomeni oscillatori, di tipo uditivo o visuale. La gestione più
+      versatile di questi fenomeni si fa mediante <link document="m14505">array</link> contenenti un periodo del
+      fenomeno oscillatorio da produrre.
+    </para>
+    <section id="id1169001188643">
+      <title>L'oscillatore tabellare</title> 
+      <para id="osctabp">
+	L'approccio più classico e versatile alla sintesi di forme
+	d'onda periodiche è la lettura ciclica di una tabella
+	contenente un periodo della forma d'onda periodica da
+	generare. Detto <code>buf[]</code> il buffer (è un array)
+	contenente la forma d'onda da generare, l'oscillatore
+	tabellare funziona per lettura ciclica della tabella, con un
+	passo di avanzamento
+	<m:math>
+	  <m:apply>
+	    <m:eq/>
+	    <m:ci>I</m:ci>
+	    <m:apply>
+	      <m:divide/>
+	      <m:apply>
+		<m:times/>
+		<m:ci>B</m:ci>
+		<m:ci>f</m:ci>
+	      </m:apply>
+	      <m:ci>R</m:ci>
+	    </m:apply>
+	  </m:apply>
+	</m:math>, 
+	dove  <m:math>
+	  <m:ci>B</m:ci>
+	</m:math> è la lunghezza del buffer, <m:math>
+	  <m:ci>f</m:ci>
+	</m:math> è la frequenza (numero di oscillazioni al secondo) che si vuole generare, e <m:math>
+	  <m:ci>R</m:ci>
+	</m:math> è il rate (frequenza di campionamento) al quale si vuole produrre l'oscillazione.
+      </para>
+      <example id="ondapex">
+	<title>Onda propagantesi</title>
+	<para id="ondap">
+	  Per dare l'illusione di una onda prodotta da un gesto di
+	  interazione e propagantesi in una certa direzione si può
+	  fare uso dell'oscillatore tabellare. Nel codice che segue il
+	  buffer viene precaricato con un periodo di sinusoide. Il
+	  punto in cui l'utilizzatore clicca sulla finestra determina
+	  la posizione iniziale della cresta, e viene generata una
+	  oscillazione la cui frequenza è impostata tramite la
+	  variabile <code>f</code>.
+
+	  <code id="id1169001280734" display="block">  
+int B = 256; // lunghezza di tabella (risoluzione)
+int R = 20;   // rate
+float f = 0.8; // frequenza in cicli al secondo
+float[] buf = new float[B];
+int HEIGHT = 128; // altezza della finestra
+float amp; // ampiezza della oscillazione
+int readPoint; // posizione orizzontale della cresta
+float decayFactor = 0.95; // fattore di decadimento dell'onda
+
+void setup() {
+ size(B,HEIGHT); 
+ stroke(255); strokeWeight(2); 
+ for (int i = 0; i &lt; buf.length; i++) buf[i] = sin(2*PI*(float)i/buf.length);
+}
+
+void draw() {
+ background(0);
+
+ if ((mouseX &gt;= 0) &amp;&amp; (mouseX &lt; B) &amp;&amp; (mousePressed)) {
+   amp = 2*(HEIGHT/2 - mouseY)/float(HEIGHT);
+   readPoint = mouseX;
+ }
+ for (int i = 0; i &lt; buf.length; i++) {
+   point(i, HEIGHT - HEIGHT/2 - HEIGHT/2*amp*buf[(i - readPoint + B/4 + B)%B]);
+ }
+ amp = decayFactor*amp;
+ readPoint = (readPoint + round(f*B/R))%B; // incremento dell'oscillatore
+}
+
+	  </code>
+	</para>
+      </example>
+      <exercise id="ondapexex1">
+	<problem id="id8879225">
+	  <para id="ondapexex1p">
+	    Si renda la frequenza di oscillazione dipendente dalla
+	    lunghezza dell'intervallo di tempo durante il quale il
+	    tasto del mouse viene tenuto premuto.
+	  </para>
+	</problem>
+	<solution id="id2668150">
+	  <para id="ondaps">
+	    <code id="id2691416" display="block">
+
+int B = 256; // lunghezza di tabella (risoluzione)
+int R = 20;   // rate
+float f = 1.1; // frequenza in cicli al secondo
+float[] buf = new float[B];
+int HEIGHT = 128; // altezza della finestra
+float amp; // ampiezza della oscillazione
+float readPoint; // posizione orizzontale della cresta
+float decayFactor = 0.92; // fattore di decadimento dell'onda
+float tempo;
+
+void setup() {
+ size(B,HEIGHT); 
+ stroke(255); strokeWeight(2); 
+ for (int i = 0; i &lt; buf.length; i++) buf[i] = sin(2*PI*(float)i/buf.length);
+}
+
+void mousePressed() {
+  tempo = millis();
+}
+
+void mouseReleased() {
+  tempo = millis() - tempo; println(tempo); 
+  f = 500/tempo;
+}
+
+void draw() {
+ background(0);
+
+ if ((mouseX &gt;= 0) &amp;&amp; (mouseX &lt; B) &amp;&amp; (mousePressed)) {
+   amp = 2*(HEIGHT/2 - mouseY)/float(HEIGHT);
+   readPoint = mouseX;
+ }
+ for (int i = 0; i &lt; buf.length; i++) {
+   point(i, HEIGHT - HEIGHT/2 - HEIGHT/2*amp*buf[(i - round(readPoint) + B/4 + B)%B]);
+ }
+ amp = decayFactor*amp;
+ readPoint = (readPoint + (f*B/R))%B; // incremento dell'oscillatore
+}
+
+</code>
+</para>
+	</solution>
+      </exercise>
+      <exercise id="ondapexex2">
+	<problem id="id1168999808774">
+	  <para id="ondapexex2p">
+	    Si imponga un inviluppo di ampiezza sulla oscillazione
+	    generata, come se a vibrare fosse una corda vincolata alle
+	    estremità.
+	  </para>
+	</problem>
+	<solution id="id1169003993962">
+	  <para id="solvincp">
+	    Quella che segue è la soluzione a <link target-id="ondapexex1"/> con i vincoli aggiunti agli estremi:
+	    <code id="id1169000087518" display="block">
+
+int B = 256; // lunghezza di tabella (risoluzione)
+int R = 20;   // rate
+float f = 1.1; // frequenza in cicli al secondo
+float[] buf = new float[B];
+int HEIGHT = 128; // altezza della finestra
+float amp; // ampiezza della oscillazione
+float readPoint; // posizione orizzontale della cresta
+float decayFactor = 0.92; // fattore di decadimento dell'onda
+float tempo;
+float ampli=0;
+
+void setup() {
+ size(B,HEIGHT); 
+ stroke(255); strokeWeight(2); 
+ for (int i = 0; i &lt; buf.length; i++) buf[i] = sin(2*PI*(float)i/buf.length);
+}
+
+void mousePressed() {
+  tempo = millis();
+}
+
+void mouseReleased() {
+  tempo = millis() - tempo; println(tempo); 
+  f = 500/tempo;
+}
+
+void draw() {
+ background(0);
+
+ if ((mouseX &gt;= 0) &amp;&amp; (mouseX &lt; B) &amp;&amp; (mousePressed)) {
+   amp = 2*(HEIGHT/2 - mouseY)/float(HEIGHT);
+   readPoint = mouseX;
+ }
+ for (int i = 0; i &lt; buf.length; i++) {
+   if (i &lt; readPoint) ampli += 1/(float)readPoint;
+   else ampli -= 1/(float)(B - readPoint);
+   point(i, HEIGHT - HEIGHT/2 - HEIGHT/2*amp*ampli*buf[(i - round(readPoint) + B/4 + B)%B]);
+ }
+ ampli = 0;
+ amp = decayFactor*amp;
+ readPoint = (readPoint + (f*B/R))%B; // incremento dell'oscillatore
+}
+
+</code>
+	  </para>
+	</solution>
+      </exercise>
+      <exercise id="ondapexex3">
+	<problem id="id1169005136087">
+	  <para id="ondapexex3p">
+	    Si renda l'oscillazione più fluida sostituendo
+	    l'arrotondamento (<code>round()</code>) con
+	    l'interpolazione lineare.
+	  </para>
+	</problem>
+      </exercise>
+    </section>
+
+    <section id="id1169002555982">
+      <title>Oscillazioni video</title>
+      <para id="videoscp">
+	L'oscillatore tabellare può essere la struttura di riferimento
+	anche per ripetizioni cicliche, a frequenza controllabile, di
+	frammenti video. In questo caso la tabella da leggere
+	ciclicamente contiene una sequenza di immagini.
+      </para>
+      <example id="id1169001516995">
+	<title>Iterazione di frammento video</title>
+	<para id="iterazionevideop">
+	  In questo esempio, quando si manda in esecuzione il
+	  programma un frammento di 4 secondi di video viene ripreso
+	  dalla videocamera a 16 frame al secondo. Poi tale frammento
+	  è riprodotto ciclicamente a 20 frame al secondo, con la
+	  possibilità di controllare la velocità di riproduzione
+	  (frequenza di oscillazione) cliccando in diverse posizioni
+	  orizzontali del mouse.
+	  <code id="id4856097" display="block">  
+import processing.video.*; 
+Capture myCapture; 
+int captureRate = 16;
+float f=1; 
+int B = 64;
+int R = 20;
+PImage[] sequenza = new PImage[B];
+
+int i;
+float j=0;
+float inc = f*B/R;
+boolean via = false;
+
+void setup() { 
+  for (int i=0; i&lt;B; i++) sequenza[i]=loadImage("vetro.jpg"); // immagine dummy, per inizializzare
+  size(200, 200); 
+  String s = "IIDC FireWire Video"; 
+  myCapture = new Capture(this, width, height, s, 30);
+  myCapture.frameRate(captureRate);
+  frameRate(R);
+} 
+ 
+void mousePressed(){
+  f = float(mouseX)/width; inc = f*B/R;
+} 
+
+void draw() { 
+  if (!via) {
+    if(myCapture.available()) { 
+      // Reads the new frame
+      myCapture.read(); 
+      sequenza[i].copy(myCapture,0,0,myCapture.width,myCapture.height,0,0,sequenza[i].width,sequenza[i].height);
+      i = (i+1)%B;
+      println(i);
+      if (i==0) via = true;
+    }
+  }
+  if (via) {  image(sequenza[floor(j)], 0, 0,200,200); 
+              j = (j+inc);  if (j&gt;=B) j=j-B;
+            }
+}
+
+
+	  </code>
+
+	</para>
+      </example>
+    </section>
+
+    <section id="id1169001941670">
+      <title>Oscillazioni nel visual programming</title>
+      <para id="oscillapd">Nel visual programming le oscillazioni tabellari spesso si
+	costruiscono utilizzando un segnale <link url="http://en.wikipedia.org/wiki/Sawtooth">sawtooth</link>
+	che consente di percorre ciclicamente gli indici dell'array,
+	ad una velocità dipendente dalla frequenza del segnale stesso.
+	<figure id="oscillapdf">
+	  <media id="id1169005294296" alt=""><image src="../../media/oscilla.png" mime-type="image/png"/></media>
+	</figure>
+	In questo patch sono dichiarati due array <code>onda1</code> e
+	<code>onda2</code> di 64 elementi ciascuno. Il segnale a dente
+	di sega viene generato ad una frequenza di 139 cicli al
+	secondo. Il suo range viene moltiplicato per 64 in maniera da
+	occupare tutto il campo degli indici (da 0 a 63) dell'array
+	<code>onda1</code>. Ogni volta che si preme il bottone di
+	<code>bang</code>, 64 campioni del segnale prodotto dalla
+	lettura della tabella <code>onda1</code> vengono scritti nella
+	tabella <code>onda2</code>. Il segnale prodotto dalla lettura
+	ciclica della tabella <code>onda1</code> è udibile attraverso
+	conversione da digitale ad analogico (<code>dac~</code>). Si
+	noti che in Pd tutti gli operatori che hanno il simbolo di
+	tilde lavorano in maniera sincrona ad audio rate, e quindi la
+	lettura dalla tabella <code>onda1</code> fornisce campioni al
+	sample rate di funzionamento (per default 44100 Hz). Si noti
+	anche la scalinatura del segnale scritto nella tabella
+	<code>onda2</code>, dovuto alla lettura non interpolata dei
+	campioni di <code>onda1</code>.
+      </para>
+      <exercise id="oscint">
+	<problem id="id1169005287372">
+	  <para id="oscintp">
+	    Come si può evitare la scalinatura nella forma d'onda
+	    prodotta dall'oscillatore tabellare di <link target-id="oscillapdf"/>?
+	  </para>
+	</problem>
+	<solution id="id1169005072878">
+	  <para id="oscints">Basta sostituire <code>tabread~</code> con
+	  <code>tabread4~</code>, in questo modo facendo una lettura
+	  interpolata di ordine 3. In altri termini, l'interpolatore
+	  fa passare un polinomio di terzo grado (una cubica) per quattro
+	  punti contigui della tabella.
+	  </para>
+	</solution>
+      </exercise>
+    </section>
+    <section id="id1169003963732">
+      <title>Ritardi variabili</title>
+      <para id="ritardip">
+	Nei sistemi interattivi c'è spesso la necessità di ritardare
+	nel tempo un segnale, un processo, o un evento. Ad esempio, se
+	ci sono più flussi di video o audio in streaming, ciascuno
+	viaggiante su canali indipendenti per i quali non è possibile
+	avere lo stesso tempo di propagazione da trasmittente a
+	fruitore, è opportuno ritardare diversamente ciascun flusso in
+	maniera da avere un riallineamento ed una sincronizzazione in
+	ricezione. In campo audio, le <emphasis>linee di
+	ritardo</emphasis> a lunghezza variabile sono alla base di
+	molti <link document="m11657">effetti</link>, quali sono echi e
+	riverberazione. 
+      </para>
+      <para id="buffercircp">
+	La struttura di supporto per la realizzazione delle linee di
+	ritardo è il buffer circolare, cioè un array ai cui elementi
+	si accede con aritmetica circolare dei puntatori. In
+	particolare, c'è una variabile <code>IN</code>, chiamata
+	puntatore di ingresso, che contiene l'indice dell'elemento
+	dell'array nel quale si va a scrivere. Una variabile
+	<code>OUT</code>, chiamata puntatore di uscita, contiene
+	l'indice dell'elemento dell'array dal quale si va a
+	leggere. Si tratta di incrementare i puntatori di accesso in
+	maniera circolare, mantenendo la loro distanza relativa pari
+	al numero di passi temporali di cui si vuole che sia fatto il
+	ritardo. Ad ogni passo temporale (o istante di campionamento)
+	il segnale di ingresso è scritto nella locazione puntata da
+	<code>IN</code> e letto dalla locazione puntata da
+	<code>OUT</code>, <code>D</code> passi indietro. Quindi, i due
+	puntatori sono aggiornati con le operazioni
+	<code id="id1169003419941" display="block">
+	  IN = (IN + 1) % B;
+	  OUT = (OUT + 1) % B;
+	</code>
+	dove <code>B</code> è la lunghezza del buffer, scelta in
+	maniera da essere maggiore del più grande valore di ritardo
+	<code>D</code> che si intende usare. Il ritardo <code>D</code>
+	può variare dinamicamente, ad esempio oscillando tra un minimo
+	ed un massimo, ma è chiaro che se esso assume un valore non
+	intero bisognerà adottare una strategia di interpolazione per
+	la lettura del segnale ritardato. Ad esempio, si può ancora
+	una volta fare interpolazione lineare tra locazioni adiacenti,
+	oppure scegliere l'intero immediatamente inferiore a
+	<code>D</code>.
+      </para>
+      <exercise id="delaychar">
+	<problem id="id1169003628156">
+	    <para id="delaycharp">
+	    Si costruisca un programma
+	    Processing che legge caratteri dalla tastiera e ne
+	    fornisce una eco sulla finestra grafica con un ritardo
+	    crescente mano a mano che si aggiungono linee di testo.
+	    </para>
+	</problem>
+	<solution id="id1169002176386">
+	  <para id="delaychars">
+<code id="id7404542" display="block">
+  
+PFont font;
+int B = 1000;
+int INTERLINEA = 30;
+int xpos=0, ypos=INTERLINEA;
+char[] buffer = new char[B];
+int OUT = 0; 
+int IN = 0;
+int D = 0;
+char carattere;
+char inchar = '\0';
+
+void setup() {
+  size(800,800);
+  font = loadFont("Courier-48.vlw"); 
+  textFont(font, 32); 
+  frameRate(30);
+}
+
+void keyReleased() {
+  inchar = key;
+}
+
+void draw() {
+    if (inchar=='\n') {
+      D+=10; 
+      IN = (OUT + D)%B; 
+      xpos = 0; 
+      ypos += INTERLINEA; 
+      inchar='\0';
+      }
+    else {
+      buffer[IN] = inchar;
+      carattere = buffer[OUT];
+      text(carattere, xpos, ypos); 
+      xpos += textWidth(carattere); 
+      IN = (IN + 1)%B; OUT = (OUT + 1)%B;
+    }
+    inchar = '\0';  
+}
+
+</code>
+	  </para>
+	</solution>
+      </exercise>
+    </section>
+  </content>
+  
+</document>

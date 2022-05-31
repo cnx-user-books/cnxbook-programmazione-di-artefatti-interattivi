@@ -1,0 +1,550 @@
+<document xmlns="http://cnx.rice.edu/cnxml">
+  <title>Pattern emergenti dal design dell'interazione</title>
+  <metadata xmlns:md="http://cnx.rice.edu/mdml">
+  <md:content-id>m14501</md:content-id>
+  <md:title>Pattern emergenti dal design dell'interazione</md:title>
+  <md:abstract>Dall'analisi di progetti di Interaction Design emergono alcuni pattern di programmazione.  Lo studio di questi e altri pattern consente di facilitare il mestiere dell'interaction designer, fornendogli un vocabolario con il quale esprimere in maniera rapida dei bozzetti informatici.</md:abstract>
+  <md:uuid>c8091439-9f91-43dc-89ef-77c728f23507</md:uuid>
+</metadata>
+  <content>
+    <para id="frascarap">
+      <quote display="inline" class="no-marks">"It is unfortunate that the teaching of design often concentrates almost exclusively on the visual aspect of things -- worse still, without its reformulation as propositional knowledge." <cite><cite-title>Jorge Frascara, in Design Issues 23(4), 2007</cite-title></cite></quote>
+    </para>
+    <section id="id1167703164429">
+      <title>La Programmazione nel Design dell'Interazione</title>
+      <para id="progID">
+	Un oggetto interattivo contiene almeno alcune delle seguenti
+	componenti: sensori, attuatori, microprocessore, collegamento
+	telematico. Queste componenti, per poter essere di supporto ad
+	una qualsiasi forma di interazione, devono essere
+	programmate. Il design dell'interazione, quando arriva alla
+	costruzione di prototipi che consentano di esperire
+	l'interazione in maniera diretta e veridica, non può
+	prescindere dalla formulazione di programmi
+	informatici. Questi sono una combinazione di algoritmi e
+	strutture dati, cioè di metodi per organizzare e manipolare
+	in maniera efficiente ed efficace le informazioni.  In realtà,
+	strumenti di programmazione efficienti si possono usare in
+	tutte le attività che normalmente precedono o costituiscono il
+	design di un prodotto interattivo:
+	<list id="listact">
+	  <item>Basic design</item>
+	  <item>Sketching</item>
+	  <item>Prototyping</item>
+	</list>
+      </para>
+      <section id="id6974443">
+	<title>Basic Design</title>
+	<para id="basicdesign">
+	  Nella progettazione di oggetti interattivi, in special modo
+	  se basati su <link document="m14293">interazione
+	  multisensoriale continua</link>, ci sono molti gradi di
+	  libertà e lo spazio di progettazione risulta vastissimo. Una
+	  strategia per affrontarlo è quella di pensare
+	  costruttivamente in termini di fenomeni elementari. Cioè,
+	  dovremmo cercare le <link url="http://www.idi.ntnu.no/~dags/interactivity.pdf">interaction
+	  gestalt</link>, astraendole dalle interazioni effettivamente
+	  effettuate. Questo processo è facilitato dalla pratica
+	  pedagogica del <link url="http://newbasicdesign.it/">basic
+	  design</link>, nella quale gli studenti affinano le proprie
+	  abilità compositive mediante la ricerca di soluzioni a
+	  problemi ben posti, e per condivisione e discussione dei
+	  risultati. Il basic design non è orientato al prodotto, e si
+	  svolge per esercitazioni che esplorano le <link url="http://homepage.mac.com/ranjanmp/.Public/Bauhaus_Ulm_NID_2005.pdf">direzioni</link>:
+	  <list id="direzioni">
+	    <item>Esperienza sensoriale diretta;</item>
+	    <item>Oggettivizzazione dell'esperienza a livello intellettuale;</item>
+	    <item>Realizzazione per sintesi di fenomeni.</item>
+	  </list>
+	</para>
+	<example id="Chiappini">
+	  <para id="exChiappinip">
+	    <link url="http://www.room50.org/collettiva/chiappini/BRIEF_The%20body%20of%20basics.pdf">The
+body of basics (C. Chiappini, 2007)</link>: "L'obiettivo
+dell'esercitazione è quello di ricavare un percorso interattivo
+attraverso delle immagini di azioni del vostro corpo". <link url="http://www.room50.org/basicdesign/basic2007">Risultati</link>.
+	  </para>
+	</example>
+<example id="moka">
+	  <para id="mokap">Multi-stage yet continuos coupling (<link url="http://www.soundobject.org/BasicSID/basicSID/">Rocchesso e Polotti,
+2008</link>): "L'obiettivo dell'esercitazione è quello di progettare il
+feedback multisensoriale per una connessione a vite (come quella della
+moka) in modo che il raggiungimento del giusto punto di chiusura sia
+facile, continuo, ed espressivo". 
+	  </para>
+	</example>
+      </section>
+      <section id="id1167703191967">
+	<title>Sketching</title> <para id="sketchingp">Lo <link url="http://www.cs.cmu.edu/~bam/uicourse/Buxton-SketchesPrototypes.pdf">sketching</link> 
+	è una attività archetipica del processo di design. Il fatto
+	che lo sketching tradizionalmente usato in architettura e nel
+	design di prodotto non sia più adeguato pone la questione su
+	cosa significhi fare sketching nel design dell'interazione
+	(<cite><cite-title>Sketching User Experiences -- Bill Buxton; Morgan Kaufmann, 2007</cite-title></cite>, <link url="http://www.billbuxton.com/">Buxton's web
+	site</link>). Tra le sue caratteristiche importanti,
+	troviamo:
+	  <list id="sketchchar">
+	    <item>Velocità</item>
+	    <item>Collezionabilità</item>
+	    <item>Bassa risoluzione</item>
+	    <item>Evocazione al posto di ri-produzione</item>
+	  </list>
+	  Gli sketch servono a facilitare una miglior comprensione del
+	  problema e, quindi, a generare nuove idee. Così come nel
+	  brainstorming, la quantità è più importante della
+	  qualità. È normale, nelle fasi iniziali di un design,
+	  produrre molti sketch e confrontarli per
+	  giustapposizione. Se ci sono pattern importanti, questi
+	  dovrebbero emergere a prima vista. Una collezione di sketch
+	  abilita il confronto dialogico, come nel basic design. Sugli
+	  sketch non si fa valutazione. Attraverso gli sketch si
+	  cercano soluzioni.
+</para>
+      </section>
+      <section id="id7385193">
+	<title>Prototyping</title>
+	<para id="protovssketch">
+	  <link url="http://www.id-book.com/chapter11_teaching.htm">Spesso</link>,
+	  lo sketching viene visto come prototipazione a bassa
+	  fedeltà. Tuttavia, mentre gli sketch hanno uno scopo
+	  principalmente generativo, i prototipi sono prodotti a fine
+	  di valutazione.
+
+<!-- This CALS table template is generated by `table.el' version
+1.5.54 -->
+<table id="sketchvsproto" summary="">
+<title>Sketch vs. Prototype (Bill Buxton)</title>
+  <tgroup cols="2" align="left" colsep="1" rowsep="1">
+    <thead valign="top">
+      <row>
+        <entry>
+	  SKETCH
+        </entry>
+        <entry>
+	  PROTOTYPE
+        </entry>
+      </row>
+    </thead>
+    <tbody valign="top">
+      <row>
+        <entry>
+	  evocative
+        </entry>
+        <entry>
+	  didactic
+        </entry>
+      </row>
+      <row>
+        <entry>
+	  suggest
+        </entry>
+        <entry>
+	  describe
+        </entry>
+      </row>
+      <row>
+        <entry>
+	  explore
+        </entry>
+        <entry>
+	  refine
+        </entry>
+      </row>
+      <row>
+        <entry>
+	  question
+        </entry>
+        <entry>
+	  answer
+        </entry>
+      </row>
+      <row>
+        <entry>
+	  propose
+        </entry>
+        <entry>
+	  test
+        </entry>
+      </row>
+      <row>
+        <entry>
+	  provoke
+        </entry>
+        <entry>
+	  resolve
+        </entry>
+      </row>
+      <row>
+        <entry>
+	  tentative
+        </entry>
+        <entry>
+	  specific
+        </entry>
+      </row>
+      <row>
+        <entry>
+	  non
+	  committal
+        </entry>
+        <entry>
+	  depiction
+        </entry>
+      </row>
+    </tbody>
+  </tgroup>
+</table>
+	</para>
+      </section>
+    </section>
+    <para id="treactiv">
+      Le tre attività di basic design, sketching, e prototyping sono
+      diverse e non c'è tra esse una relazione d'ordine. Nelle
+      esercitazioni di basic design, si può procedere per produzione
+      rapida di molti esemplari di soluzione (come nello sketching) e
+      raffinarne alcuni per sottoporli a valutazione (come nel
+      prototyping).
+    </para>
+  <para id="processingsketches">
+      Nel design dell'interazione, è importante avere materiali,
+strumenti, e tecniche adeguate a tutte e tre le attività
+descritte. <link url="http://processing.org/">Processing</link> è un
+linguaggio e un ambiente di sviluppo adeguato per buona parte di
+questi scopi.  È interessante notare come i programmi Processing
+vengano chiamati sketch, a enfatizzare la velocità con cui si possono
+ottenere bozzetti interattivi, utili a esplorare un vasto ventaglio di
+soluzioni.
+      </para>
+    <section id="id1167703584089">
+      <title>Emergenza dall'Esperienza</title>
+    <para id="IxDlab">
+      Nel Laboratorio di <link url="http://www.interaction-venice.com/interaction-design-programme.html">Prototipazione
+      di Artefatti Interattivi</link>, gli studenti di <link url="http://www.iuav.it/Facolta/facolt--di1/English-ve/faculty/teaching-f/GillianCra/index.htm">Gillian
+      Crampton Smith</link> e <link url="http://www.iuav.it/Didattica1/pagine-web/facolt--di1/Philip-Tab/index.htm">Philip
+      Tabor</link> hanno sviluppato alcuni prototipi di oggetti
+      interattivi. Nel corso della realizzazione dei progetti si sono
+      evidenziati alcuni problemi di programmazione, per i quali sono
+      state trovate soluzioni ad hoc. Molti di questi problemi si
+      ritrovano in molti ambiti diversi, e vale la pena di analizzarli
+      per studiare delle soluzioni efficaci e di applicabilità
+      generale.
+    </para>
+    <para id="IxDprojects">
+      <link url="http://www.interaction-venice.com/courses/06-07Lab2/"> Progetti del 2007</link>:
+      <list id="progetti07">
+	<item><link url="http://www.interaction-venice.com/courses/06-07Lab2/?page_id=127">Aequilibrium</link>
+	  <list id="aeq">
+	    <item>Object Oriented Programming (the fish class)</item>
+	    <item>Ray tracing: distance, direction, reflection (of the fish)</item>
+	    <item>Oscillations (of fish tails)</item>
+	  </list>
+	</item>
+
+	<item><link url="http://www.interaction-venice.com/courses/06-07Lab2/?page_id=128">Flyer Cafe</link>
+	  <list id="fly">
+	    <item>Using a library <link url="http://en.wikipedia.org/wiki/Api">API</link> (<link url="http://sourceforge.net/projects/reactivision/">reacTIVision</link>)</item>
+	    <item>Stack (of geometric transformations)</item>
+	    <item>Object Oriented Programming (not used yet)</item>
+	  </list>
+	</item>
+
+	<item><link url="http://www.interaction-venice.com/courses/06-07Lab2/?page_id=129">Secret Garden</link>
+	  <list id="sec">
+	    <item>Using a library <link url="http://en.wikipedia.org/wiki/Api">API</link> (<link url="http://www.v3ga.net/processing/BlobDetection/">BlobDetection</link>)</item>
+	    <item>Filtering (temporal smoothing)</item>
+	    <item>Thresholding, hysteresis, and adaptation</item>
+	    <item>Timers</item>
+	  </list>
+	</item>
+	
+
+	<item><link url="http://www.interaction-venice.com/courses/06-07Lab2/?page_id=132">That Sinking Feeling</link>
+	  <list id="sink">
+	    <item>Multithreading (not used yet)</item>
+	    <item>Oscillations (waves)</item>
+	    <item>Timers</item>
+	  </list>
+	</item>
+
+	<item><link url="http://www.interaction-venice.com/courses/06-07Lab2/?page_id=133">Tree of Life</link>
+	  <list id="tree">
+	    <item>Mapping (distance to pixels)</item>
+	    <item>Timers</item>
+	    <item>Using a library <link url="http://en.wikipedia.org/wiki/Api">API</link> (<link url="http://sonia.pitaru.com/">Sonia</link>, <link url="http://processing.org/reference/libraries/video/index.html">Video</link>) </item>	    
+	    <item>Thresholding and hysteresis</item>
+	  </list>
+	</item>
+
+	<item><link url="http://www.interaction-venice.com/courses/06-07Lab2/?page_id=134">Venice 360</link>
+	  <list id="v360">
+	    <item>Using a library <link url="http://en.wikipedia.org/wiki/Api">API</link> (<link url="http://sonia.pitaru.com/">Sonia</link>)</item>	    	    
+	    <item>Thresholding and hysteresis</item>
+	    <item>Buffers (audio)</item>
+	  </list>
+	</item>
+	
+
+	<item><link url="http://www.interaction-venice.com/courses/06-07Lab2/?page_id=135">WAV</link>
+	  <list id="wav">
+	    <item>Oscillations (visual wave)</item>
+	    <item>Matrices (of LEDs)</item>
+	    <item>Timers (in visual programming)</item>
+	    <item>Multiplexing/demultiplexing (in visual programming)</item>
+	  </list>
+	</item>
+      </list>
+      <link url="http://www.interaction-venice.com/projects/iuav07-08Lab2/"> Progetti del 2008</link>: 
+      <list id="progetti08"><item> Si presentano pattern di programmazione simili a quelli dell'anno precedente. In alcuni casi si registra la necessità di fare comunicare tra loro applicazioni diverse (client-server). </item>
+      </list> 
+    </para>
+    </section>
+
+    <section id="id8688269">
+      <title>Pattern</title> 
+
+      <para id="patterndef">Nel design degli artefatti interattivi,
+      così come in altre aree della progettazione, si può procedere
+      alla risoluzione di un problema mediante identificazione di
+      <link url="http://en.wikipedia.org/wiki/Pattern_language">pattern</link>,
+      cioè di configurazioni che ricorrono sovente, e per le quali
+      esistono soluzioni di efficacia consolidata.
+      </para>
+
+      <para id="patterncomp">
+	Un pattern si può descrivere mediante alcuni campi, tra i quali:
+	<list id="patterncampi">
+
+	  <item>Esempio (es., un sensore rileva la posizione di una
+	  persona in un corridoio, un'immagine sulla parete segue la
+	  persona come un'ombra)</item>
+
+	  <item>Problema (es., il sensore produce numeri che dipendono
+	  nonlinearmente dalla distanza in metri. Lo spazio
+	  dell'immagine sulla parete è misurabile in pixel. Come
+	  traduco in pixel i numeri prodotti dal sensore?)</item>
+
+	  <item>Vincoli (es., la traduzione deve essere efficiente e precisa in tutti i punti)</item>
+
+	  <item>Principio (es., è un mapping non lineare uno-a-uno) </item>
+
+	  <item>Soluzione (es., Se ho mille pixel, posso riempire un
+	  array di mille celle con i valori misurati dal sensore,
+	  eventualmente interpolando a partire da poche
+	  misure. Tuttavia, a me serve la mappa inversa, che dal
+	  sensore va ai pixel. Cioè, dovrei trovare l'indice di una
+	  cella dell'array dato il suo contenuto. Una maniera per
+	  rendere efficiente l'accesso per contenuto è di organizzare
+	  una struttura dati che si chiama hash. Oppure, usando
+	  l'array ordinato proveniente dalle misure, posso effettuare
+	  una ricerca per bisezione.)</item>
+	</list>
+      </para>
+    </section>
+
+    <section id="id8495080">
+      <title>Riferimenti</title>
+      <para id="refs">
+	Al mondo ci sono più testi di programmazione che esemplari di
+Panda gigante. Molti di questi sono buoni e utili, e pochi tra i buoni
+e gli utili sono liberamente accessibili. In particolare, segnalo per
+la sua chiarezza e compattezza il <link url="http://www.greenteapress.com/thinkapjava/">free book</link>
+<cite><cite-title>How to Think Like a Computer Scientist: Java Version -- Allen
+B. Downey; Green Tea Press 2003</cite-title></cite>. E' anche accessibile nei suoi
+<link url="http://www.brpreiss.com/books/opus5/">contenuti</link>
+<cite><cite-title> Data Structures and Algorithms with Object-Oriented Design
+Patterns in Java -- Bruno R. Preiss, John Wiley and Sons
+1999</cite-title></cite>. Tra i vari linguaggi ai quali fanno riferimento i manuali
+di programmazione, certamente Java è quello più indicato per gli
+utilizzatori di <link url="http://processing.org/">Processing</link>,
+visto che Processing è costruito su Java, e di questo mette a
+disposizione l'intero repertorio di classi. Gli autori di Processing
+hanno scritto il libro <cite><cite-title> Processing: A Programming Handbook for
+Visual Designers and Artists -- Casey Reas and Ben Fry, MIT Press
+2007</cite-title></cite>. Un buon testo di introduzione alla programmazione in Processing è <cite><cite-title>Learning Processing: A Beginner's Guide to Programming Images, Animation, and Interaction --
+Daniel Shiffman, Morgan Kaufmann, 2008</cite-title></cite>.
+      </para>
+    
+    </section>
+
+    <exercise id="coopRinging">
+	<problem id="id5240235">
+	<para id="coopRing">
+	  There is a crowd of autonomous communicating creatures in a
+	  room, like in a cocktail party. Each has some kind of visual
+	  display, such as a light bulb. You want to select one
+	  individual in the crowd and make that selection known to
+	  everybody by coordinating individual light modulations. One
+	  possibility is a propagating wavefront, like in <link url="http://en.wikipedia.org/wiki/Mexican_wave"> Mexican
+	  waves </link> at the stadium. A Processing sketch to test
+	  this phenomenon can be written in less than fifteen minutes.
+	</para>
+        </problem>
+      <solution id="id8313340">
+	<para id="explosion">
+	  Click over the window produced by the following code:
+	  <code id="id8562052" display="block">
+   
+int NOBJ = 100;
+int WINSIZE = 100;
+int[] objects_x = new int[NOBJ];
+int[] objects_y = new int[NOBJ];
+int[] distance = new int[NOBJ];
+int counter = 0;
+
+void setup() {
+ size(WINSIZE, WINSIZE); 
+ for (int i=0; i&lt;NOBJ; i++) { 
+   objects_x[i] = int(random(0, WINSIZE-1));
+   objects_y[i] = int(random(0, WINSIZE-1));   
+ }  
+}
+
+void mouseReleased() {
+ for (int i=0; i&lt;NOBJ; i++) {  
+   distance[i] = int(sqrt(sq(objects_x[i] - mouseX) + sq(objects_y[i] - mouseY)));
+ }
+ counter = 0;
+}
+
+void draw() {
+  background(200);
+  counter = counter+1;
+  for (int i=0; i&lt;NOBJ; i++) {  
+    if (distance[i] == counter){
+      strokeWeight(4);
+      point(objects_x[i], objects_y[i]);
+    }
+    else {
+      strokeWeight(2);
+      point(objects_x[i], objects_y[i]);
+    }
+  }
+}
+    
+	  </code>
+	</para>
+      </solution>
+    </exercise>
+
+   <exercise id="coopRingingImp">
+	<problem id="id6936908">
+	<para id="coopRingImp">
+	  Modify the sketch of problem <link target-id="coopRinging"/> to
+	  implement an imploding wavefront, and compare the two
+	  simulations to see which is the most effective for
+	  highlighting one individual in the crowd.
+	</para>
+        </problem>
+      <solution id="id2126523">
+	<para id="implosion">
+	  Click over the window produced by the following code:
+	  <code id="id6940987" display="block">
+   
+int NOBJ = 100;
+int WINSIZE = 100;
+int[] objects_x = new int[NOBJ];
+int[] objects_y = new int[NOBJ];
+int[] distance = new int[NOBJ];
+int counter = 0;
+
+void setup() {
+ size(WINSIZE, WINSIZE); 
+ for (int i=0; i&lt;NOBJ; i++) { 
+   objects_x[i] = int(random(0, WINSIZE-1));
+   objects_y[i] = int(random(0, WINSIZE-1));   
+ }  
+}
+
+void mouseReleased() {
+ for (int i=0; i&lt;NOBJ; i++) {  
+   distance[i] = int(sqrt(sq(objects_x[i] - mouseX) + sq(objects_y[i] - mouseY)));
+ }
+ counter = WINSIZE - 1;
+}
+
+void draw() {
+  background(200);
+  counter = counter - 1;
+  for (int i=0; i&lt;NOBJ; i++) {  //ciclo for 
+    if (distance[i] == counter){
+      strokeWeight(4);
+      point(objects_x[i], objects_y[i]);
+    }
+    else {
+      strokeWeight(2);
+      point(objects_x[i], objects_y[i]);
+    }
+  }
+}
+    
+	  </code>
+	</para>
+      </solution>
+    </exercise>
+
+   <exercise id="coopRingingImpRandom">
+	<problem id="id2725374">
+	<para id="coopRingImpR">
+	  A crowd in a room is not static. Add a sort of <link url="http://en.wikipedia.org/wiki/Random_walk">random
+	  walk</link> to the sketch of problem <link target-id="coopRingingImp"/>, and you will notice
+	  that the wavefront becomes barely visible. You will need to
+	  play with color to making it noticeable again.
+	</para>
+        </problem>
+      <solution id="id6120830">
+	<para id="implosionR">
+	  Click over the window produced by the following code:
+	  <code id="id4948949" display="block">
+   
+int NOBJ = 100;
+int WINSIZE = 100;
+int[] objects_x = new int[NOBJ];
+int[] objects_y = new int[NOBJ];
+int[] distance = new int[NOBJ];
+int counter = 0;
+float randomConstant = 1.1;
+
+void setup() {
+ size(WINSIZE, WINSIZE); 
+ for (int i=0; i&lt;NOBJ; i++) { 
+   objects_x[i] = int(random(0, WINSIZE-1));
+   objects_y[i] = int(random(0, WINSIZE-1));   
+ }  
+ frameRate(WINSIZE/2);
+}
+
+void mouseReleased() {
+ for (int i=0; i&lt;NOBJ; i++) {  
+   distance[i] = int(sqrt(sq(objects_x[i] - mouseX) + sq(objects_y[i] - mouseY)));
+ }
+ counter = WINSIZE - 1;
+}
+
+void draw() {
+  background(200);
+  counter = counter - 1;
+  for (int i=0; i&lt;NOBJ; i++) { 
+    objects_x[i] =constrain(objects_x[i]+int(random(-randomConstant,randomConstant)), 
+       0, WINSIZE-1);	    
+    objects_y[i] =constrain(objects_y[i]+int(random(-randomConstant,randomConstant)), 
+       0, WINSIZE-1);	    
+    if (distance[i] == counter){
+      strokeWeight(8);
+      stroke(255,0,0);
+      point(objects_x[i], objects_y[i]);
+    }
+    else {
+      strokeWeight(2);
+      stroke(120,120,0);
+      point(objects_x[i], objects_y[i]);
+    }
+  }
+}
+    
+	  </code>
+	</para>
+      </solution>
+    </exercise>
+  </content>
+  
+</document>

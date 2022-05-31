@@ -1,0 +1,21 @@
+<col:collection xmlns="http://cnx.rice.edu/collxml" xmlns:col="http://cnx.rice.edu/collxml" xml:lang="it">
+  <metadata xmlns:md="http://cnx.rice.edu/mdml" mdml-version="0.5">
+    <md:content-id>col10417</md:content-id>
+    <md:title>Programmazione di Artefatti Interattivi</md:title>
+    <md:language>it</md:language>
+    <md:license url="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution License</md:license>
+    <md:uuid>dc2ab28a-543d-4ae6-863e-dae62f8d9670</md:uuid>
+<md:slug>programmazione-di-artefatti-interattivi</md:slug>
+</metadata>
+  <col:content>
+    <col:module document="m14501"/>
+    <col:module document="m12614"/>
+    <col:module document="m14505"/>
+    <col:module document="m14532"/>
+    <col:module document="m14556"/>
+    <col:module document="m14565"/>
+    <col:module document="m14574"/>
+    <col:module document="m14602"/>
+    <col:module document="m14632"/>
+  </col:content>
+</col:collection>

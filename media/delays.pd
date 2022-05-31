@@ -1,0 +1,32 @@
+#N canvas 687 318 416 118 10;
+#X obj 17 4 bng 15 250 50 0 empty empty empty 0 -6 0 8 -262144 -1 -1
+;
+#X obj 17 77 bng 15 250 50 0 empty empty empty 0 -6 0 8 -262144 -1
+-1;
+#X obj 17 48 delay 500;
+#X msg 38 3 stop;
+#X msg 41 25 1000;
+#X floatatom 113 8 5 0 0 0 - - -;
+#X obj 113 34 pipe 1000;
+#X floatatom 113 63 5 0 0 0 - - -;
+#X obj 202 7 notein;
+#X obj 202 69 noteout;
+#X obj 202 38 pipe 0 0 0 1000;
+#X obj 333 30 random 7;
+#X obj 333 6 bng 15 250 50 0 empty empty empty 0 -6 0 8 -262144 -1
+-1;
+#X floatatom 333 56 5 0 0 0 - - -;
+#X connect 0 0 2 0;
+#X connect 2 0 1 0;
+#X connect 3 0 2 0;
+#X connect 4 0 2 0;
+#X connect 5 0 6 0;
+#X connect 6 0 7 0;
+#X connect 8 0 10 0;
+#X connect 8 1 10 1;
+#X connect 8 2 10 2;
+#X connect 10 0 9 0;
+#X connect 10 1 9 1;
+#X connect 10 2 9 2;
+#X connect 11 0 13 0;
+#X connect 12 0 11 0;

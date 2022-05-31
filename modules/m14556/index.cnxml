@@ -1,0 +1,595 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:md="http://cnx.rice.edu/mdml">
+  <title>Liste, pile e code</title>
+  <metadata><md:content-id>undefined</md:content-id><md:title/><md:uuid>5b92683d-5e19-4c99-9ad3-05f704e0d7ab</md:uuid>
+</metadata>
+  <content>
+    <section id="idm1112992">
+      <title>Liste</title>
+      <para id="listsp">
+	Una istanza di classe può contenere, tra le sue variabili,
+	anche un puntatore ad un oggetto della classe stessa. Questo
+	consente di concatenare oggetti di una stessa classe, a
+	formare strutture complesse quali liste o alberi. In
+	particolare, una lista è ottenuta dalla concatenazione di
+	<emphasis>nodi</emphasis>, ciascuno dei quali contiene un
+	puntatore al nodo successivo, nonché un campo dati talvolta
+	chiamato <emphasis>cargo</emphasis>.
+      </para>
+      <example id="traversalex">
+	<title>Attraversamento di una lista</title>
+	<para id="traversalp">
+	  Nel codice Processing che segue viene creata una lista di
+	  tre nodi concatenati. Quindi tale lista viene visitata per
+	  attraversamento e il cargo di ogni nodo viene stampato. Si
+	  notino le seguenti cose:
+	  <list id="traversalpl">
+	    <item>La classe <code>Node</code> ha due tipi di
+	    costruttore, uno senza parametri ed uno con
+	    parametri. Quest'ultimo consente la creazione con
+	    inizializzazione del cargo e del puntatore al nodo
+	    successivo.</item> <item>C'è un metodo
+	    <code>toString</code> che converte il cargo in una stringa
+	    stampabile ogni volta che viene invocata la funzione print
+	    sul nodo.</item>
+	  </list>
+	  <code display="block" id="idp948400">
+       
+void setup() {
+  Node node3 = new Node (3, null);
+  Node node2 = new Node (2, node3);
+  Node node1 = new Node (1, node2); 
+  printList(node1);
+}
+
+void printList (Node list) {
+    Node node = list;
+    
+    while (node != null) {
+        print(node);
+        node = node.next;
+    }
+    println();
+}
+
+class Node {
+  int cargo;
+  Node next;
+  
+  Node() {
+    cargo = 0;
+    next = null;
+  }
+  
+  Node (int cargo, Node next) {
+    this.cargo = cargo;
+    this.next = next;
+  }
+  
+  String toString() { //rende l'oggetto di classe Node stampabile
+    return cargo + " ";
+  }
+}
+
+</code>
+	</para>
+      </example>
+
+      <para id="recursp">
+	Così come gli array sono il supporto naturale dei cicli
+	<code>for</code> e delle iterazioni sequenziali, così le liste
+	sono il supporto naturale della algoritmica ricorsiva. Gli
+	algoritmi ricorsivi sono definiti induttivamente stabilendo
+	l'operazione per un elemento base (la base della ricorsione) e
+	stabilendo come utilizzare il risultato dell'elaborazione
+	sulla lista privata di tale elemento. Inoltre, bisogna
+	assicurarsi che l'elaborazione così arrangiata in maniera
+	"telescopica" raggiunga ad un certo punto una condizione di
+	terminazione della ricorsione. Ciò non è sempre banale perché
+	le catene di puntatori degli elementi di una lista potrebbero
+	presentare dei <emphasis>loop</emphasis>, la cui visita
+	procederebbe senza fine.
+
+	Nell'esempio <link target-id="traversalex"/> si può introdurre
+	una funzione di stampa dall'ultimo elemento al primo:
+	  <code display="block" id="idm7265472">
+       
+void printBackward (Node list) {
+ if (list == null) return; // terminazione della ricorsione
+ 
+ Node head = list;
+ Node tail = list.next;
+ 
+ printBackward(tail);
+ print(head);   // base della ricorsione
+}
+
+</code>
+      </para>
+
+      <para id="wrapperclassp">Si può costruire una classe che incorpori l'intera lista e le
+	operazioni che su di essa si intendono eseguire. Ad esempio,
+	si può estendere <link target-id="traversalex"/> con
+	l'introduzione di una classe <code>IntList</code> che supporta
+	stampe per attraversamento diretto e inverso (ricorsivo). Si
+	noti l'uso di un doppio metodo <code>printBackward</code>, uno
+	con e uno senza argomenti, per consentire l'invocazione del
+	metodo sull'oggetto lista senza necessità di passare un
+	puntatore alla testa della lista stessa.
+
+	<code display="block" id="idp6022464">
+
+       
+IntList lista;
+
+void setup() {
+  lista = new IntList();
+  lista.addFirst(3);
+  lista.addFirst(2);
+  lista.addFirst(1);
+  lista.printList();
+  lista.printBackward();
+}
+
+class IntList {
+ int length;
+ Node head;
+
+   IntList() {
+     length = 0;
+     head = null;
+   }
+
+   void addFirst (int i) {
+     Node node = new Node(i, head);
+     head = node;
+     length++;
+   }
+   
+   void printList () {
+     Node node = head;
+    
+      while (node != null) {
+        print(node);
+        node = node.next;
+      }
+      println();
+   }
+
+  void printBackward() {
+    printBackward(head);
+    println();
+  }
+  
+  void printBackward (Node head) {
+   if (head == null) return; // terminazione della ricorsione
+
+   Node tail = head.next;
+ 
+   printBackward(tail);
+   print(head);   // base della ricorsione
+  }
+ }
+ 
+
+
+class Node {
+  int cargo;
+  Node next;
+  
+  Node() {
+    cargo = 0;
+    next = null;
+  }
+  
+  Node (int cargo, Node next) {
+    this.cargo = cargo;
+    this.next = next;
+  }
+  
+  String toString() { //rende l'oggetto di classe Node stampabile
+    return cargo + " ";
+  }
+}
+
+</code>
+
+	Questo è un esempio di classe <emphasis>wrapper</emphasis>,
+	cioè di confezionamento object-oriented di una struttura
+	dati. Le classi wrapper esistono per tutti i tipi primitivi di
+	Java (<code>double</code>, <code>int</code>, ecc.) e
+	consentono di creare e manipolare oggetti che contengono
+	valori primitivi. Ad esempio, la classe wrapper
+	<code>Integer</code> può essere interrogata in relazione al
+	più piccolo e più grande valore rappresentabile mediante
+	<code>Integer.MIN_VALUE</code> e
+	<code>Integer.MAX_VALUE</code>, rispettivamente. Il valore
+	numerico di un oggetto della classe <code>Integer</code> si
+	ottiene con il metodo <code>intValue()</code>. Anche gli array
+	in Java sono accessibili mediante una classe wrapper. La
+	classe <code>Arrays</code>, accessibile importando
+	<code>java.util.*</code>, consente di fare operazioni di test
+	di uguaglianza, di ricerca, e di ordinamento. Ad esempio, il
+	semplice codice
+	<code display="block" id="idm7883120">
+       
+import java.util.*;
+
+void setup() {
+  int[] a = new int[10];
+  int[] b = new int[10];
+  
+  for (int i=0; i&lt;10; i++) {
+    a[i] = i;
+    b[i] = i;
+  }
+  println(Arrays.equals(a,b));
+}
+
+	</code>
+esegue un test di uguaglianza tra due array di interi.
+      </para>
+
+  <para id="lettlists"><title>Lettura</title> Si legga il capitolo 14 di <link url="http://www.greenteapress.com/thinkapjava/">How to Think Like a
+Computer Scientist</link>
+      </para>
+    </section>
+    <section id="idp127808">
+      <title>Pile</title>
+      <para id="pilep">
+	Lo <emphasis>stack</emphasis>, o pila, è una struttura dati di
+	grande importanza. Ad esempio, essa è implicitamente coinvolta
+	nell'esecuzione di codice ricorsivo, quale quello del metodo
+	<code>printBackward</code>. In effetti, a runtime le chiamate
+	a procedura sono sistemate, insieme ai loro parametri, una
+	sopra all'altra nell'ordine in cui sono
+	invocate. Nell'esempio, alla terza chiamata ricorsiva di
+	<code>printBackward</code> ci si trova in cima allo stack una
+	chiamata su una lista di un solo elemento.
+
+	Ad uno stack si accede mediante due sole operazioni, la
+	<code>push</code> (immissione) di un elemento in cima allo
+	stack, e la <code>pop</code> (rimozione) di un elemento dalla
+	cima dello stack.
+
+	Una classe <code>Stack</code> è già disponibile in Java (e in
+	Processing) dopo aver importato <code>java.util.*</code>. Essa
+	funziona su oggetti della classe <code>Object</code>, che è la
+	più generica delle classi Java, nonché superclasse di tutte.
+
+      </para>
+      <example id="idm484944">
+	<title>Attraversamento inverso di una lista</title>
+	<para id="invtrav">
+	  La visita in ordine inverso, dalla coda alla testa, degli
+	  elementi di una lista si può ottenere per via ricorsiva,
+	  come già visto in <link target-id="recursp"/>. Alternativamente, si può usare uno stack
+	  come struttura dati di appoggio.
+	  <code display="block" id="idp1980128">
+
+import java.util.*;
+
+IntList lista;
+Stack pila;
+
+void setup() {
+  pila = new Stack();
+  lista = new IntList();
+  lista.addFirst(3);
+  lista.addFirst(2);
+  lista.addFirst(1);
+  lista.printList();
+  for (Node node = lista.head; node != null; node = node.next) {
+   pila.push(node); 
+  }
+  while (!pila.isEmpty()) {
+    Node node = (Node) pila.pop();
+    print(node);
+  }
+}
+
+class IntList {
+ ... omissis ...
+ 
+class Node {
+ ... omissis ... 
+
+
+	  </code>
+	Si può notare che 
+	  <list id="invtravlist">
+	    <item>gli elementi della lista sono inseriti nella pila nel loro ordine naturale, essendo così estraibili da questa in ordine inverso, </item>
+	    <item>esiste un metodo <code>isEmpty()</code> della classe <code>Stack</code> che consente di verificare la condizione di pila vuota,</item>
+	    <item>è necessario fare un type casting sull'oggetto restituito dalla <code>pop()</code>. Questo è un generico <code>Object</code> in quanto la classe <code>Stack</code> non è in grado di conoscere il tipo dei suoi elementi.</item>
+	    <item>in generale è sempre possibile convertire un algoritmo ricorsivo in uno non ricorsivo facendo uso di uno stack. In questo esempio la <code>pila</code> viene usata in luogo del run-time stack.</item>
+	  </list>
+
+	</para>
+      </example>
+
+      <section id="idm1603648">
+	<title>Valutazione di espressioni</title>
+	<para id="parsingp">Lo stack è anche la struttura dati che con maggior
+	  naturalezza supporta la valutazione di espressioni. Per
+	  essere più precisi, data una stringa contenente operandi e
+	  operatori in <link url="http://en.wikipedia.org/wiki/Postfix_notation">notazione
+	  postfissa</link>, una scansione lineare della stringa
+	  accompagnata dall'utilizzazione di uno stack di appoggio può
+	  consentire una facile valutazione della espressione. E'
+	  necessario inoltre individuare i <emphasis>token</emphasis>
+	  della stringa (operandi o operatori), separati da
+	  delimitatori che tipicamente sono caratteri di
+	  spaziatura. C'è una classe di <code>java.util</code>,
+	  chiamata <code>StringTokenizer</code>, che fa proprio
+	  questo. Ad esempio, la "tokenizzazione" di una espressione
+	  in notazione postfissa si può eseguire con:
+	  <code display="block" id="idm7764400">
+	    
+import java.util.*;
+
+StringTokenizer st = new StringTokenizer("11 22+33*", " +-*/", true);
+
+while (st.hasMoreTokens())
+  println(st.nextToken());
+	    
+	  </code>
+	  dove gli argomenti di <code>StringTokenizer()</code>, oltre
+	  a comprendere la stringa da analizzare, comprendono la lista
+	  dei delimitatori e un parametro boolean che indica che i
+	  separatori devono essere considerati anch'essi come token.
+	  La valutazione di espressioni su stringhe è un esempio semplice di <link url="http://en.wikipedia.org/wiki/Parsing">parsing</link>.
+	</para>
+	<exercise id="express">
+	  <problem id="idm769696">
+	    <para id="expressp"> Si costruisca un valutatore di
+	      espressioni in notazione postfissa con operatori di
+	      somma e moltiplicazione su numeri interi.
+	    </para>
+	  </problem>
+	  <solution id="idm1564448">
+	    <para id="expresss">Nella soluzione che segue la stringa da analizzare è
+	      scritta in testa al codice. Si fa uso del metodo
+	      <code>equals()</code> della classe <code>String</code> e
+	      del metodo <code>parseInt()</code> della classe
+	      <code>Integer</code>. Si noti inoltre il matching di  <link url="http://en.wikipedia.org/wiki/Regular_expression">espressione regolare</link> supportato dalla classe <code>String</code>. In questo caso l'espressione regolare rappresenta una qualsiasi sequenza di cifre.
+	      <code display="block" id="idm6738496">
+		
+import java.util.*;
+
+StringTokenizer st = new StringTokenizer("3 12 21 ++ 10*", " +*", true);
+Stack pila = new Stack();
+String tocco;
+int op1=0, op2=0;
+
+while (st.hasMoreTokens()) {
+    tocco=st.nextToken();
+    if (tocco.equals("+")) {  
+       if (!pila.isEmpty()) op2 = Integer.parseInt((String)pila.pop());
+       if (!pila.isEmpty()) {
+         op1 = Integer.parseInt((String)pila.pop());
+         pila.push(Integer.toString(op1+op2)); 
+       }
+    }
+    else if (tocco.equals("*")) {  
+       if (!pila.isEmpty()) op2 = Integer.parseInt((String)pila.pop());
+       if (!pila.isEmpty()) {
+         op1 = Integer.parseInt((String)pila.pop());
+         pila.push(Integer.toString(op1*op2)); 
+       } 
+    }
+    else if (tocco.matches("\\d+")) { // token as a sequence of digits
+      pila.push(tocco);
+      println(tocco);
+    }
+    
+    }
+println(pila);
+
+
+
+	      </code>
+	    </para>
+	  </solution>
+	</exercise>
+      </section>
+      <section id="idm186624">
+	<title>Lo stack delle trasformazioni geometriche</title>
+	<para id="geometricstack">
+	  Un ambito di impiego molto importante della struttura dati a
+	  stack è la grafica interattiva. In particolare, le
+	  trasformazioni geometriche che si effettuano in <link document="m12665" target-id="pillole_di_opengl">OpenGL</link>
+	  avvengono per <link document="m14505" target-id="cgmatrix">moltiplicazione matrice-vettore</link>, e
+	  le matrici sono memorizzate sullo <link document="m12665" target-id="stack">stack delle trasformazioni</link>. Ciò
+	  consente di costruire modelli gerarchici di oggetti nello
+	  spazio. Nel momento in cui si fa <code>pushMatrix()</code>
+	  la cima della pila contiene la matrice di trasformazione
+	  geometrica che si sta applicando ad un particolare oggetto,
+	  o in altri termini lo stato corrente del sistema. Le
+	  trasformazioni applicate successivamente alla
+	  <code>pushMatrix()</code> vengono "dimenticate" nel momento
+	  in cui si fa una <code>popMatrix()</code>, in questo modo
+	  ripristinando lo stato precedente a queste ultime
+	  trasformazioni.
+	</para>
+	<example id="idm529040">
+	  <title>Geometria grafica costruttiva</title> <para id="cggp">Un semplice esempio di modello gerarchico è un
+	  braccio meccanico costituito da tre parallelepipedi: una
+	  base, un omero, e un avanbraccio. La collocazione dell'omero
+	  è fissa rispetto alla base, e di questa deve seguirne gli
+	  spostamenti. Allo stesso modo, l'avanbraccio è vincolato
+	  geometricamente all'omero. Il codice seguente disegna il
+	  braccio meccanico che è spostabile nel suo complesso
+	  mediante il mouse. Grazie all'uso dello stack, l'omero può
+	  ruotare indipendentemente dalla base restando ad essa
+	  vincolato. L'avanbraccio può ruotare indipendentemente
+	  dall'omero restando a questo vincolato.
+	    <code display="block" id="idp79360">
+	           
+int LAVANB = 70;
+int LOMERO = 80;
+int LBASE = 30;
+float OMEROT = PI/3;
+float AVANROT = PI/5;
+
+void setup(){
+          size(200, 200, P3D); 
+	}
+
+void avanbraccio(){
+  pushMatrix();
+  translate(0, LAVANB/2, 0);
+  box(20, LAVANB, 20);
+  popMatrix();
+}
+
+void omero(){
+  pushMatrix();
+  translate(0, LOMERO/2, 0);
+  box(20, LOMERO, 20);
+  popMatrix();
+}
+
+	void draw(){
+          background(0);
+          translate(mouseX,mouseY);
+          rotateY(PI/6);
+          box(LBASE);
+          translate(0, LBASE, 0);
+          rotateX(OMEROT);
+          omero();
+          translate(0, LOMERO, 0);
+          rotateX(AVANROT);
+          avanbraccio();
+	}
+
+	    </code>
+	  </para>
+	</example>
+      </section>
+
+ <para id="lettstack"><title>Lettura</title> Si legga il capitolo 15 di <link url="http://www.greenteapress.com/thinkapjava/">How to Think Like a
+Computer Scientist</link>
+      </para>
+    </section>
+
+    <section id="idp5622592">
+      <title>Code</title>
+      <para id="codep">
+	La struttura dati chiamata coda (<emphasis>queue</emphasis>)
+	organizza una politica di accesso alle informazioni analoga a
+	quella applicata idealmente quando si fa la fila presso uno
+	sportello. Il primo cliente ad essere servito è il primo che
+	si è presentato alla coda dello sportello. Una coda (e in
+	realtà anche una pila) può essere realizzata mediante una
+	lista concatenata, consentendo in questo modo di non porre
+	limiti alla lunghezza della coda stessa.  L'accesso alla lista
+	che supporta la coda avviene mediante un puntatore di testa e
+	uno di coda.
+      </para>
+
+      <example id="idm6901024">
+	<title>Inserimento in coda ed estrazione dalla coda</title>
+	<para id="codaex">
+	  Si può realizzare una coda mediante concatenazione di nodi e
+	  preparazione di due punti di accesso. Questo garantisce che
+	  l'accesso in inserimento ed in estrazione sia efficiente e a
+	  tempo costante. Nella realizzazione qui riportata la classe
+	  <code>Node</code> è atta a realizzare nodi con cargo di tipo
+	  Object generico. La presenza del metodo
+	  <code>toString()</code> garantirà che il nodo è stampabile.
+	  <code display="block" id="idp5015232">
+
+Queue q;
+Integer uno = new Integer(1);
+Integer due = new Integer(2);
+Integer tre = new Integer(3);
+
+void setup() {
+  q = new Queue();
+  q.add(uno);
+  q.add(due);
+  q.add(tre);
+  println(q.remove());
+  println(q.remove());
+  println(q.remove());
+}
+
+class Queue {
+ int length;
+ Node first, last;
+
+   Queue() {
+     length = 0;
+     first = null;
+     last = null;
+   }
+   
+   boolean isEmpty() {
+     return first == null;
+   }
+
+   void add (Object obj) {
+     Node node = new Node(obj, null);
+     if (last != null) {
+       last.next = node;
+     }
+     last = node;
+     if (first == null) {
+       first = last;
+     }
+     length +=1;
+   }
+   
+   Object remove () {
+     Node result = first;
+     if (first != null) {
+       first = first.next;
+     }
+     else {
+       last = null;
+     }
+     length -= 1;
+     return result;
+   }
+ }
+ 
+
+
+class Node {
+  Object cargo;
+  Node next;
+  
+  Node() {
+    cargo = null;
+    next = null;
+  }
+  
+  Node (Object cargo, Node next) {
+    this.cargo = cargo;
+    this.next = next;
+  }
+  
+  String toString() { //rende l'oggetto di classe Node stampabile
+    return cargo + " ";
+  }
+}
+
+
+	  </code>
+
+Spesso si preferisce, per ragioni di semplicità realizzativa ed
+efficienza, realizzare la coda usando un array come struttura di
+supporto. In questo caso la crescita della coda è limitata dalla
+lunghezza dell'array. Questa realizzazione si chiama <emphasis>buffer
+circolare</emphasis> ed è impiegato, ad esempio, per la realizzazione
+di <link document="m14532" target-id="ritardip">ritardi variabili</link>
+nell'elaborazione dei segnali.
+
+	</para>
+      </example>
+ <para id="lettqueue"><title>Lettura</title> Si legga il capitolo 16 di <link url="http://www.greenteapress.com/thinkapjava/">How to Think Like a
+Computer Scientist</link>
+      </para>
+    </section>
+  </content>
+  
+</document>

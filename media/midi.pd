@@ -1,0 +1,22 @@
+#N canvas 698 469 291 143 10;
+#X obj 17 58 makenote;
+#X msg 17 24 72 100;
+#X obj 17 106 noteout;
+#X obj 87 23 hsl 50 15 0 500 0 0 empty empty empty -2 -6 0 8 -262144
+-1 -1 900 1;
+#X floatatom 84 58 5 0 0 0 - - -;
+#X obj 176 70 stripnote;
+#X floatatom 176 45 5 0 0 0 - - -;
+#X floatatom 234 45 5 0 0 0 - - -;
+#X floatatom 176 97 5 0 0 0 - - -;
+#X floatatom 234 97 5 0 0 0 - - -;
+#X text 74 7 duration (ms);
+#X connect 0 0 2 0;
+#X connect 0 1 2 1;
+#X connect 1 0 0 0;
+#X connect 3 0 4 0;
+#X connect 3 0 0 2;
+#X connect 5 0 8 0;
+#X connect 5 1 9 0;
+#X connect 6 0 5 0;
+#X connect 7 0 5 1;

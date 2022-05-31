@@ -1,0 +1,718 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:m="http://www.w3.org/1998/Math/MathML" xmlns:md="http://cnx.rice.edu/mdml">
+  <title>Array e Mappe</title>
+  <metadata><md:content-id>undefined</md:content-id><md:title/><md:uuid>c1b87abe-57cd-48c1-a5bc-6bccaf5ec3bb</md:uuid>
+</metadata>
+  <content>
+    <section id="idp9015040">
+      <title>Array</title>
+    <para id="array">Un array è una lista numerata di valori,
+      tutti dello stesso tipo (<code>int</code>, <code>float</code>,
+      ecc.). La numerazione, in Processing (e Java), parte da zero. La
+      dichiarazione e creazione di un array avviene in maniera uguale
+      a quella di un oggetto istanza di classe.
+
+      Ad esempio
+      <code display="block" id="idp14877616">float[] vettore = new float[100];
+	println(vettore);
+      </code>
+      crea un array di 100 elementi di tipo <code>float</code> e ne stampa il contenuto, che è inizialmente costituito da zeri. 
+
+      L'array così dichiarato è a tutti gli effetti un oggetto istanza
+      di classe, e tale classe ha anche una variabile
+      <code>length</code>, che ne contiene la lunghezza. Quindi, per
+      inizializzare l'array come una rampa lineare che va da 0 a 1, si
+      può fare 
+
+      <code display="block" id="idp7418640">  
+	for (int i = 0; i &lt; vettore.length; i++)
+	    vettore[i] = (float)i/vettore.length;
+	println(vettore);
+      
+      </code>
+      <note id="idp8063216">Si provi a togliere il <link url="http://en.wikipedia.org/wiki/Type_conversion#Explicit_type_conversion">typecasting</link>
+      <code>(float)</code> e si spieghi perché la rampa non viene più
+      generata.</note>
+    </para>
+    <example id="idp14939568">
+      <title>1-to-1 mapping</title>
+      <para id="midicon">
+	  Un <link url="http://en.wikipedia.org/wiki/Midi_controller">MIDI
+      controller</link> continuo, come uno slider, può inviare valori
+      tra 0 e 127, che possono essere usati come indici per leggere i
+      valori di una certa proprietà. Un array può servire a mappare un controllo
+      in un valore di proprietà. La relazione tra controllo
+      (indice) e proprietà è una mappa uno a uno.
+
+      Nel codice che segue, la mappa è costruita muovendo sopra alla
+      finestra il mouse con tasto premuto. Invece, se il mouse viene
+      spostato senza essere premuto, la posizione orizzontale del
+      puntatore (tra 0 e 127) viene interpretata come indice della
+      mappa, che restituisce il valore della proprietà di brillantezza
+      dello sfondo.
+	<code display="block" id="idp10379760">
+	  
+int ris = 128;
+int[] midimap = new int[128];
+
+void setup() {
+ size(ris,2*ris); 
+}
+
+void draw() {
+ background(255);
+ if ((mouseX &gt;= 0) &amp;&amp; (mouseX &lt; ris)) 
+   if (!mousePressed) 
+     background((256 - midimap[mouseX]));
+   else    
+     midimap[mouseX] = mouseY;
+
+ for (int i=0; i&lt;midimap.length; i++) point(i, midimap[i]);
+}
+          
+	</code>
+Come si possono evitare i "buchi" nella mappa dovuti alla lettura non continua delle posizioni del mouse?
+      </para>
+    </example>
+
+    <para id="extris"><title>Estensione di risoluzione</title> Ho un
+      controllore MIDI (a 128 valori) e voglio scandire una tabella di
+      256 valori. Si può iterare la lettura avanzando il punto di
+      lettura con passo 2.
+
+	<code display="block" id="idp228624">
+int  sup_ris = 256;
+int  inf_ris = 128;
+float[] midimap = new float[sup_ris];
+
+void setup() {
+ size(inf_ris,inf_ris); 
+ colorMode(RGB, 1.0);
+ for (int i = 0; i &lt; midimap.length; i++) midimap[i] = sin(PI*(float)i/midimap.length);
+}
+
+void draw() {
+ if ((mouseX &gt;= 0) &amp;&amp; (mouseX &lt; inf_ris) &amp;&amp; (mousePressed)) 
+ {
+   point(mouseX, inf_ris - inf_ris*midimap[sup_ris/inf_ris*mouseX]);
+ }
+}
+
+</code>
+    </para>
+
+    <para id="ridris"><title>Riduzione di risoluzione</title> Ho un
+      controllore a 10 bit (1024 valori) e devo mapparlo in una
+      proprietà secondo una tabella di 128 valori che descrivono un
+      semiperiodo di seno. 
+	<code display="block" id="idp7118048">
+	  
+int inf_ris = 128;
+int sup_ris = 1024;
+float[] midimap = new float[inf_ris];
+
+void setup() {
+ size(sup_ris,32); 
+ colorMode(RGB, 1.0);
+ for (int i = 0; i &lt; midimap.length; i++) midimap[i] = sin(PI*(float)i/midimap.length);
+}
+
+void draw() {
+ if ((mouseX &gt;= 0) &amp;&amp; (mouseX &lt; sup_ris) &amp;&amp; (mousePressed)) 
+   background(midimap[int(float(mouseX)/sup_ris*inf_ris)]); 
+}
+
+</code>
+
+      Come posso accedere alla tabella sfruttando per quanto possibile
+      l'accuratezza dei 10 bit? Si può fare una
+      <emphasis>interpolazione lineare</emphasis>. Il beneficio
+      dell'interpolazione diventa molto evidente nel passaggio da 10 a
+      3 bit, cioè ponendo <code>inf_ris = 8</code>. Con
+      l'interpolazione lineare, il metodo <code>draw()</code> va così
+      riscritto:
+	<code display="block" id="idp8498848">
+	  
+void draw() {
+ if ((mouseX &gt;= 0) &amp;&amp; (mouseX &lt; sup_ris) &amp;&amp; (mousePressed)) 
+ {
+   int flo = floor(float(mouseX)/sup_ris*inf_ris); 
+   float alpha = float(mouseX)/sup_ris*inf_ris - float(flo); 
+   background((1-alpha)*midimap[flo] + alpha*midimap[(flo+1)%midimap.length]);
+ }
+}
+	  
+	</code>
+	<code>alpha</code> è il resto del troncamento a <m:math>
+	  <m:apply>
+	    <m:log/>
+	    <m:logbase>
+	      <m:cn>2</m:cn>
+	    </m:logbase>
+	    <m:ci>inf_res</m:ci>
+	  </m:apply>
+	</m:math> bit
+	dell'indice di <m:math>
+	  <m:apply>
+	    <m:log/>
+	    <m:logbase>
+	      <m:cn>2</m:cn>
+	    </m:logbase>
+	    <m:ci>sup_res</m:ci>
+	  </m:apply>
+	</m:math>  bit, e viene usato per pesare due elementi
+	contigui dell'array a <code>inf_res</code> elementi. Quale è la funzione
+	dell'operazione di modulo <code>%midimap.length</code>?
+    </para>
+
+    <para id="invmap"><title>Inversione di una mappa</title> Ha senso
+      costruire una mappa inversa, ad esempio per ritrovare l'indice a
+      partire da un valore di proprietà, solo se la mappa di partenza
+      è monotona, crescente o decrescente, in modo da stabilire una
+      corrispondenza biunivoca tra indice e valore. Ad esempio,
+      pre-caricando un array con un quarto di seno campionato in 128
+      punti, come costruisco un array che contiene la mappa inversa,
+      cioè l'arcoseno?
+
+	<code display="block" id="idp14461072">
+int ris = 128;
+float[] midimap = new float[ris];
+float[] invmap = new float[ris];
+
+void setup() {
+ size(ris,ris); 
+ colorMode(RGB, 1.0);
+ /* inizializza */
+ for (int i = 0; i &lt; midimap.length; i++) midimap[i] = (ris - 1) * sin(PI/2*(float)i/midimap.length);
+ /* inverti */
+ for (int i = 0; i &lt; midimap.length; i++) invmap[round(midimap[i])] = i; 
+ /* disegna */
+ for (int i = 0; i &lt; midimap.length; i++) 
+   {
+     point(i, ris - midimap[i]);
+     point(i, ris - invmap[i]);
+   }
+ println(invmap);
+}
+ 
+	</code>
+
+	<exercise id="holesp">
+	  <problem id="idp8587216">
+	    <para id="holespt">
+	      Si noti, dal printout prodotto dalla <link target-id="invmap">inversione di una mappa</link>, che la
+	    mappa inversa così costruita ha parecchi buchi
+	    (zeri). Come si possono eliminare tali buchi?
+	    </para>
+	  </problem>
+	  <solution id="idp11034832">
+	    <para id="holesps">
+	    Il codice seguente riempie i buchi per interpolazione, ma
+	    non funziona se i buchi sono fatti da più zeri contigui:
+	<code display="block" id="idp15247664">
+for (int i = 1; i &lt; invmap.length-1; i++)
+   if (invmap[i] &lt; 0.0001) // se buco, fai la media degli adiacenti
+     invmap[i] = (invmap[i-1] + invmap[i+1])/2; /* non funziona se i buchi sono fatti
+       da più zeri contigui */
+ println(invmap);
+	  
+	  </code>
+	    </para>
+	  </solution>
+	</exercise>
+    </para>
+
+      <para id="linmap"><title>Mappe lineari</title> In molti casi i
+	sensori si comportano linearmente e ciò che serve è una mappa
+	lineare. In tal caso, non è necessario scomodare un array per
+	realizzarla. Ad esempio, si supponga che un sensore di
+	distanza restituisca un valore in metri che corrisponde alla
+	quantizzazione della distanza massima di 10 metri in 1024
+	valori (10 bit). Se con tale sensore vogliamo mappare diverse
+	posizioni da 1 a 3 metri in indici di pixel da 0 a 127, si può
+	semplicemente notare che la distanza di 1 metro produce il valore 102, mentre la distanza di 3 metri produce il valore 307. Detto <m:math>
+	  <m:ci>d</m:ci>
+	</m:math> il valore di distanza tra 0 e 1023 restituito dal sensore, il pixel da accendere è <m:math>
+	  <m:apply>
+	    <m:times/>
+	    <m:apply>
+	      <m:divide/>
+	      <m:cn>128</m:cn>
+	      <m:apply>
+		<m:minus/>
+		<m:cn>307</m:cn>
+		<m:cn>102</m:cn>
+	      </m:apply>
+	    </m:apply>
+	    <m:apply>
+	      <m:minus/>
+	      <m:ci>d</m:ci>
+	      <m:cn>102</m:cn>
+	    </m:apply>
+	  </m:apply>
+	</m:math>
+      </para>
+
+      <para id="istog"><title>Istogrammi</title>
+	 Le operazioni che si basano sul
+	conteggio di elementi vengono supportate bene da
+	rappresentazioni mediante array. E' questo il caso della
+	produzione dell'<link document="m12838" target-id="histogramp">istogramma</link>. In
+	elaborazione di immagini questa è una operazione che si fa
+	assai di frequente in quanto supporta diverse elaborazioni
+	efficaci dei colori.
+      </para>
+      <para id="lettarray"><title>Lettura</title> Si legga il capitolo
+	10 di <link url="http://www.greenteapress.com/thinkapjava/">How to Think
+	Like a Computer Scientist</link>
+      </para>
+    </section>
+
+    <section id="idp1591040">
+      <title>Array nel visual programming</title>
+      <para id="arrayvpl">
+	Gli array, come liste ordinate di numeri, si prestano
+	naturalmente ad una rappresentazione visuale, e quindi trovano
+	un impiego esteso nel <link url="http://en.wikipedia.org/wiki/Visual_programming">visual
+	programming</link>, quale è quello che si pratica con gli
+	ambienti <link url="http://en.wikipedia.org/wiki/Max/MSP">Max/MSP</link> e
+	<link url="http://en.wikipedia.org/wiki/Pure_Data">Pure
+	Data</link> (Pd).
+      </para>
+
+      <para id="arrayspd">In Pd un array può essere allocato mediante la primitiva
+	 <code>table</code>, alle quale viene passato un nome e una
+	 lunghezza. Tutti gli array sono memorizzati come numeri
+	 floating point. Il contenuto degli array può essere
+	 visualizzato in una finestra facendo "open" sull'oggetto
+	 <code>table</code>. Ad esempio, se creo un oggetto con
+	 <code>table mappa 64</code>, l'interprete costruisce un
+	 subpatch contenente un array, il quale si può visualizzare
+	 cliccando sull'oggetto stesso. Si può
+	 accedere ad ogni singolo elemento dell'array con gli oggetti
+	 <code>tabread mappa</code> e <code>tabwrite mappa</code>,
+	 rispettivamente.
+
+	In più, gli array in Pd hanno metodi che supportano varie
+	operazioni. Ad esempio:
+	<list id="arrayops"><item>una sequenza di valori
+	crescente tra -3 a 3 che inizia alla locazione di posizione 4
+	si può impostare con il messaggio <code>; mappa 4 -3 -2 -1 0 1 2
+	3</code>;</item>
+	  <item>l'array di nome <code>mappa</code> si può rinominare <code>map</code> mediante il messaggio <code>; mappa rename map</code>;</item>
+	  <item>il riquadro che contiene la rappresentazione visuale dell'array si può ridimensionare con un messaggio del tipo <code>; map bounds 0 -2 10 2</code></item>
+	  <item>Sulla cornice del riquadro si possono porre delle marcature metriche con un messaggio del tipo <code>; map xticks 0 0.1 5</code> nonché dei valori di riferimento con <code>; map xlabel -1.1 0 1 2 3 4 5</code></item>
+	</list>
+      </para>
+    </section>
+    <section id="idp1348896">
+      <title>Matrici</title> 
+      <para id="twodarr">
+      Qualsiasi tipo si può usare come tipo base
+      per un array ( <code>int</code>, <code>float</code>,
+      <code>string</code>, ecc.). In particolare, un array può essere
+      tipo base per un array, in questo modo consentendo di fare array
+      di array, o array bidimensionali. 
+ 
+      Un array bidimensionale si dichiara e si istanzia con <code display="block" id="idp1641872">int[][] A = new int[ROWS][COLUMNS];</code> dove
+	<code>ROWS</code> e <code>COLUMNS</code> conterranno i numeri
+	di righe e colonne che si vogliono riservare per l'array.
+
+	Ogni riga è essa stessa un array, al quale si può accedere con
+	<code>A[i]</code>, mentre all'elemento di riga <code>i</code>
+	e colonna <code>j</code> si accede con <code>A[i][j]</code>,
+	che in questo caso è una variabile di tipo <code>int</code>.
+
+	Questa volta <code>A.length</code> restituisce il numero di
+	righe dell'array, mentre il numero di colonne si può conoscere
+	con <code>A[0].length</code>.
+      </para>
+
+      <para id="arrayinit">
+	Un array, mono- o bi-dimensionale, può essere inizializzato
+	all'atto della creazione. Nel caso di un array a 3 righe e 4
+	colonne ciò si può fare con
+
+	<code display="block" id="idp13263280">
+         
+	  int[][]  A  =  {  {  1,  0, 12, -1 },
+                            {  7, -3,  2,  5 },
+                            { -5, -2,  2, -9 }
+                         };
+       
+	</code>
+      </para>
+
+      <para id="nestedloops">
+	Così come gli array monodimensionali vengono scanditi
+	agevolmente con un ciclo <code>for</code>, così gli array
+	bidimensionali vengono scanditi con due cicli <code>for</code>
+	annidati, uno che scandisce le righe e uno che scandisce le
+	colonne:
+	<code display="block" id="idp13794800">
+         
+	  for (int i = 0; i &lt; ROWS; i++) {
+	       for (int j = 0; j &lt; COLUMNS; j++) {
+	           A[i][j] = ...
+	       }
+	  }
+        
+	</code>
+
+	Ad esempio, nel codice seguente viene inizializzato un array
+	bidimensionale di colori, e successivamente questa tavolozza
+	di colori viene visualizzata.
+	<code display="block" id="idp15183552">
+          
+	  int ROWS = 4;
+	  int COLUMNS = 4;
+	  color[][] grid = new color[ROWS][COLUMNS];
+
+	  for (int row = 0; row &lt; ROWS; row++) {
+	     for (int col = 0; col &lt; COLUMNS; col++) {
+	        grid[row][col] = color(row*60, 0, col*60);
+	     }
+	  }
+
+	  for (int row = 0; row &lt; ROWS; row++) {
+	     for (int col = 0; col &lt; COLUMNS; col++) {
+	        fill(grid[row][col]);
+	        rect(row*25, col*25, 25, 25);
+	     }
+	  }
+         
+	</code>
+      </para>
+
+      <exercise id="rotcol">
+	<problem id="idp14391216">
+	  <para id="rotcolt">
+	    Si visualizzi una tavolozza di 4x4 colori che ruota in
+	    senso orizzontale, come se fosse la superficie di un
+	    cilindro che ruota intorno all'asse verticale.
+	  </para>
+	</problem>
+	<solution id="idp10311792">
+	  <para id="rotcols">
+	    <code display="block" id="idp7214720">
+   
+ int ROWS = 4;
+ int COLUMNS = 4;
+ color[][] grid = new color[ROWS][COLUMNS];
+ int step;
+ 
+
+ void setup(){
+	  for (int row = 0; row &lt; ROWS; row++) {
+	     for (int col = 0; col &lt; COLUMNS; col++) {
+	        grid[row][col] = color(row*60, 0, col*60);
+	     }
+          frameRate(5);
+          noStroke();
+	  }
+
+	  for (int row = 0; row &lt; ROWS; row++) {
+	     for (int col = 0; col &lt; COLUMNS; col++) {
+	        fill(grid[row][col]);
+	        rect(row*25, col*25, 25, 25);
+	     }
+	  }
+ }  
+ 
+ void draw(){
+   for (int row = 0; row &lt; ROWS; row++) {
+	     for (int col = 0; col &lt; COLUMNS; col++) {
+	        fill(grid[(row+step)%COLUMNS][col]);
+	        rect(row*25, col*25, 25, 25);
+	     }
+	  }
+   step = (step+1)%COLUMNS;
+ }
+ 
+	    </code>
+	  </para>
+	</solution>
+      </exercise>
+
+      <para id="floatmatrix">
+	Gli array multidimensionali di tipo <code>float</code> o
+	<code>double</code> sono utilizzati in moltissimi contesti, in
+	quanto sono di supporto alla <link document="m10090">Aritmetica delle Matrici</link>. Questa
+	aritmetica consente di rappresentare ed effettuare in maniera
+	compatta operazioni su array di numeri. Ad esempio, per
+	invertire l'ordine dei numeri di un array di 4 elementi è
+	sufficiente pre-moltiplicarlo per una matrice
+	<m:math>
+	  <m:matrix>
+	    <m:matrixrow>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>1 </m:cn>
+	    </m:matrixrow>
+	    <m:matrixrow>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>1 </m:cn>
+	      <m:cn>0 </m:cn>
+	    </m:matrixrow>
+	    <m:matrixrow>
+	      <m:cn>0 </m:cn>
+	      <m:cn>1 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	    </m:matrixrow>
+	    <m:matrixrow>
+	      <m:cn>1 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	    </m:matrixrow>
+	  </m:matrix>
+	</m:math>
+oppure, per scambiare i numeri in posizione pari con quelli in posizione dispari si può usare la matrice
+	<m:math>
+	  <m:matrix>
+	    <m:matrixrow>
+	      <m:cn>0 </m:cn>
+	      <m:cn>1 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	    </m:matrixrow>
+	    <m:matrixrow>
+	      <m:cn>1 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	    </m:matrixrow>
+	    <m:matrixrow>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>1 </m:cn>
+	    </m:matrixrow>
+	    <m:matrixrow>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>1 </m:cn>
+	      <m:cn>0 </m:cn>
+	    </m:matrixrow>
+	  </m:matrix>
+	</m:math>
+      </para>
+
+      <para id="cgmatrix">Nella computer grafica interattiva, punti e
+      vettori sono rappresentati in <link document="m12664" target-id="coordinate_omogenee">coordinate omogenee </link>
+      mediante array di quattro elementi, e tutte le <link document="m12664" target-id="rotazioni_traslazioni">trasformazioni
+      geometriche</link> (traslazioni, rotazioni, scalamenti,
+      proiezioni) sono realizzate con prodotti matrice-vettore.	
+      </para>
+
+      <para id="matrixvetmul"><title>Prodotto Matrice-Vettore</title>
+	L'inversione tra elementi di posto pari ed elementi di posto
+	dispari mediante prodotto matrice-vettore è illustrata dal
+	codice
+	<code display="block" id="idp14477648">  
+	  int DIM = 4;
+	  float[][] myMatrix = {{0, 1, 0, 0},
+                                {1, 0, 0, 0},
+                                {0, 0, 0, 1},
+                                {0, 0, 1, 0}
+                               };
+
+          float[] myVector = {0.1, 0.2, 0.3, 0.4};
+          float[] newVector = new float[4];
+
+          for (int i=0; i&lt;DIM; i++)
+            for (int j=0; j&lt;DIM; j++)
+               newVector[i] += myMatrix[i][j] * myVector[j];
+
+          println(myVector); println();    
+          println(newVector);
+        
+	</code>
+
+      </para>
+
+      <exercise id="circularp">
+	<problem id="idp10180448">
+	  <para id="circularpt">
+	  Come è fatta la matrice che, pre-moltiplicata per un array,
+	  ne ruota circolarmente di una posizione gli elementi?
+	  </para>
+	</problem>
+	<solution id="idp8279328">
+	  <para id="circularps">
+	<m:math>
+	  <m:matrix>
+	    <m:matrixrow>
+	      <m:cn>0 </m:cn>
+	      <m:cn>1 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	    </m:matrixrow>
+	    <m:matrixrow>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>1 </m:cn>
+	      <m:cn>0 </m:cn>
+	    </m:matrixrow>
+	    <m:matrixrow>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>1 </m:cn>
+	    </m:matrixrow>
+	    <m:matrixrow>
+	      <m:cn>1 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	      <m:cn>0 </m:cn>
+	    </m:matrixrow>
+	  </m:matrix>
+	</m:math>
+	    Una matrice fatta così è un caso particolare di <link url="http://en.wikipedia.org/wiki/Circulant_matrix">matrice
+	    circolante</link>.
+	  </para>
+	</solution>
+      </exercise>
+
+      <example id="NtoNmap">
+	<title>Many-to-Many Mapping</title>
+	<para id="NtoNmapp">
+	  In molte applicazioni di interaction design (si veda, ad
+	  esempio, il caso della <link url="http://www.icad.org/websiteV2.0/Conferences/ICAD2004/papers/hunt_hermann.pdf">interactive
+	  sonification</link>), ci si trova a dover mappare una
+	  molteplicità di variabili, il cui valore può venire dalla
+	  lettura di sensori, in una molteplicità di parametri
+	  algoritmici. Spesso tale mapping è lineare ed esprimibile
+	  con un prodotto matrice-vettore. Ad esempio,
+	  <emphasis>distanza, velocità, e temperatura</emphasis> si
+	  possono mappare in <emphasis>posizione, colore, e frequenza
+	  di oscillazione</emphasis> di un oggetto grafico, in maniera
+	  che, ad esempio, il colore dipenda da una combinazione di
+	  velocità e temperatura.
+
+	  Il funzionamento delle <link url="http://en.wikipedia.org/wiki/Mixing_console">Mixing
+	  Console</link> si può interpretare come mapping multivariato
+	  lineare degli ingressi nelle uscite.
+
+	  Purtroppo, molti mapping di interesse sono non-lineari, e
+	  non esprimibili mediante prodotto matrice-vettore. Ad
+	  esempio, la trasformazione delle <link document="m12664" target-id="color_type">coordinate di rappresentazione dei
+	  colori</link> <link url="http://en.wikipedia.org/wiki/HSV_color_space#From_RGB_to_HSV">da
+	  RGB a HSB</link> è non lineare.
+	</para>
+
+
+      </example>
+
+      <para id="lettmatrix"><title>Lettura</title>
+      Si legga la sezione <link url="http://www.brpreiss.com/books/opus5/html/page89.html#SECTION005200000000000000000">Multi-Dimensional
+      Arrays</link> di <link url="http://www.brpreiss.com/books/opus5/">Data Structures and
+      Algorithms with Object-Oriented Design Patterns in Java</link>
+      o, ancor meglio, la sezione <link url="http://math.hws.edu/javanotes/c7/s5.html">Multi-Dimensional
+      Arrays</link> di <link url="http://math.hws.edu/javanotes/">Introduction to Programming
+      Using Java</link>.
+      </para>
+
+
+
+
+
+    </section>
+
+    <section id="idp17175840">
+      <title>Mappe</title>
+      <para id="perchemappe">
+	Gli array soffrono di due limitazioni principali:
+	<list id="probarray">
+	  <item>la loro occupazione di memoria va pre-impostata;</item>
+	  <item>gli indici sono obbligatoriamente numeri interi.</item>
+	</list>
+	Quando si parla di mappe, in ambito delle strutture dati, ci
+	si riferisce di solito a strutture più generali, la cui
+	dimensione è dinamicamente allocabile, e nelle quali l'accesso
+	agli elementi può avvenire attraverso oggetti di tipo
+	arbitrario, chiamati <emphasis>key</emphasis> (chiave).
+      </para>
+
+      <para id="lettmap"><title>Lettura</title> Si legga il capitolo
+	19 di <link url="http://www.greenteapress.com/thinkapjava/">How to Think
+	Like a Computer Scientist</link>
+      </para>
+
+    </section>
+
+    <section id="idp11617712">
+      <title>Matrici nel Physical Computing</title>
+
+      <para id="ledmatrix">Nel progetto <link url="http://www.interaction-venice.com/courses/06-07Lab2/?page_id=135">WAV</link>,
+      la classe <link url="http://wiring.org.co/reference/libraries/Matrix/index.html">Matrix</link>
+      per l'ambiente <link url="http://wiring.org.co/index.html">Wiring</link> di <link url="http://itp.nyu.edu/physcomp/">physical computing</link> è
+      stata usata per pilotare una matrice di LED a 8 righe e 16
+      colonne per mezzo di un paio di chip <link url="http://www.maxim-ic.com/quick_view2.cfm/qv_pk/1339">MAXIM
+      MAX7219</link>. 
+
+      Supponiamo per semplicità di dover gestire una matrice a 8 righe
+      e 8 colonne per mezzo di un solo chip MAX7219 e di voler
+      propagare una cresta d'onda da sinistra a destra.  La matrice
+      viene dichiarata e istanziata come
+	<code display="block" id="idp9180352">
+	  Matrix myMatrix = Matrix(0, 2, 1); </code> Si può
+	predisporre un array bidimensionale di bit 8x8 mediante
+	istanziazione della classe <link url="http://wiring.org.co/reference/libraries/Sprite/index.html">Sprite</link>:
+	<code display="block" id="idp12491280">Sprite wave = Sprite( 
+                        8, 8, 
+                        b10000000,
+                        b10000000, 
+                        b01000010, 
+                        b01000010,
+                        b00100100,
+                        b00100100, 
+                        b00011000, 
+                        b00011000,  
+                        ); 
+	</code>
+	e scrivere una funzione da eseguirsi a clockrate
+	<code display="block" id="idp14390944">
+	  void loop() 
+          { 
+            myMatrix.write(i, 1, wave);     // place sprite on screen (i is an int)
+            delay(1000);                    // wait a little bit 
+            myMatrix.clear();               // clear the screen for next animation frame 
+            i = 1 + (i+1)%8;                // circular (between 1 and 8) increment of i
+          } 
+	</code>
+	oppure, alternativamente, procedere direttamente alla scrittura ciclica
+	<code display="block" id="idp7166480">
+	  void loop() 
+          { 
+            myMatrix.clear(); // clear display 
+ 
+            delay(1000); 
+ 
+            // turn pixels on (i is an int that is forced to stay between 0 and 7)
+	    // decreasing ramp
+            myMatrix.write(1, 1+(i)%8, HIGH); 
+            myMatrix.write(2, 1+(i)%8, HIGH); 
+            myMatrix.write(3, 1+(i+1)%8, HIGH); 
+            myMatrix.write(4, 1+(i+1)%8, HIGH); 
+            myMatrix.write(5, 1+(i+2)%8, HIGH); 
+            myMatrix.write(6, 1+(i+2)%8, HIGH); 
+            myMatrix.write(7, 1+(i+3)%8, HIGH); 
+            myMatrix.write(8, 1+(i+3)%8, HIGH); 
+	    // increasing ramp
+            myMatrix.write(3, 1+(i+6)%8, HIGH); 
+            myMatrix.write(4, 1+(i+6)%8, HIGH); 
+            myMatrix.write(5, 1+(i+5)%8, HIGH); 
+            myMatrix.write(6, 1+(i+5)%8, HIGH); 
+            myMatrix.write(7, 1+(i+4)%8, HIGH); 
+            myMatrix.write(8, 1+(i+4)%8, HIGH); 
+	    i++;
+           } 
+	</code>
+      </para>
+    </section>
+  </content>
+  
+</document>

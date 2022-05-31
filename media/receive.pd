@@ -1,0 +1,12 @@
+#N canvas 666 480 291 104 10;
+#X obj 129 29 value foo2;
+#X floatatom 129 59 5 0 0 0 - - -;
+#X obj 175 56 print foo2;
+#X obj 18 13 receive foo;
+#X floatatom 18 42 5 0 0 0 - - -;
+#X obj 129 2 bng 15 250 50 0 empty empty empty 0 -6 0 8 -262144 -1
+-1;
+#X connect 0 0 1 0;
+#X connect 0 0 2 0;
+#X connect 3 0 4 0;
+#X connect 5 0 0 0;
