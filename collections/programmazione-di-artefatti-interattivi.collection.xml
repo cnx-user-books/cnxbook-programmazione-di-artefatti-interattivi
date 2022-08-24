@@ -1,12 +1,13 @@
-<col:collection xmlns="http://cnx.rice.edu/collxml" xmlns:col="http://cnx.rice.edu/collxml" xml:lang="it">
+<?xml version="1.0"?>
+<col:collection xmlns="http://cnx.rice.edu/collxml" xmlns:col="http://cnx.rice.edu/collxml" xml:lang="it" authors="Davide Rocchesso">
   <metadata xmlns:md="http://cnx.rice.edu/mdml" mdml-version="0.5">
     <md:content-id>col10417</md:content-id>
     <md:title>Programmazione di Artefatti Interattivi</md:title>
     <md:language>it</md:language>
     <md:license url="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution License</md:license>
     <md:uuid>dc2ab28a-543d-4ae6-863e-dae62f8d9670</md:uuid>
-<md:slug>programmazione-di-artefatti-interattivi</md:slug>
-</metadata>
+    <md:slug>programmazione-di-artefatti-interattivi</md:slug>
+  </metadata>
   <col:content>
     <col:module document="m14501"/>
     <col:module document="m12614"/>
